@@ -1,4 +1,9 @@
 <section class="space-y-6">
+  <.breadcrumbs crumbs={[
+    {"Accueil", "/"},
+    {"Catalogue global", "/global-events"},
+    {"Nouvel événement", ""}
+  ]} />
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 animate-fade-in-up">
     <div class="flex items-center gap-4 mb-4">
       <div class="size-12 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
@@ -18,11 +23,22 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 animate-fade-in-up delay-1">
     <div class="p-6">
       <%= if flash = Phoenix.Flash.get(@flash, :error) do %>
-        <div class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 flex items-start gap-3 animate-slide-in" role="alert">
+        <div
+          class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 flex items-start gap-3 animate-slide-in"
+          role="alert"
+        >
           <.icon name="hero-exclamation-circle" class="size-5 shrink-0 mt-0.5 text-red-500" />
           <p class="text-sm text-red-700 font-medium flex-1">{flash}</p>
-          <button type="button" class="shrink-0 cursor-pointer" phx-click="lv:clear-flash" phx-value-key="error">
-            <.icon name="hero-x-mark" class="size-5 text-red-400 hover:text-red-600 transition-colors" />
+          <button
+            type="button"
+            class="shrink-0 cursor-pointer"
+            phx-click="lv:clear-flash"
+            phx-value-key="error"
+          >
+            <.icon
+              name="hero-x-mark"
+              class="size-5 text-red-400 hover:text-red-600 transition-colors"
+            />
           </button>
         </div>
       <% end %>
