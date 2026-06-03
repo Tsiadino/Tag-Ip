@@ -5,19 +5,34 @@ defmodule EventDefinitionWeb.OrgEventsLive do
   import Ecto.Query, only: [from: 2]
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket), do: Phoenix.PubSub.subscribe(EventDefinition.PubSub, "global_events")
 
     orgs = load_orgs()
-    default_org_id = if orgs != [], do: List.first(orgs).id, else: nil
+    selected_org_id = params["org_id"] || if orgs != [], do: List.first(orgs).id, else: nil
 
     {:ok,
      assign(socket,
        organizations: orgs,
-       selected_org_id: default_org_id,
-       org_event_defs: load_org_event_defs(default_org_id),
+       selected_org_id: selected_org_id,
+       org_event_defs: load_org_event_defs(selected_org_id),
        global_events: load_all_global_events()
      )}
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
+    org_id = params["org_id"] || socket.assigns.selected_org_id
+
+    if org_id != socket.assigns.selected_org_id do
+      {:noreply,
+       assign(socket,
+         selected_org_id: org_id,
+         org_event_defs: load_org_event_defs(org_id)
+       )}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
