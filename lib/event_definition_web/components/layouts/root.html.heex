@@ -27,11 +27,11 @@
       })();
     </script>
   </head>
-
-  <!-- Correction du scroll : Remplacement de min-h-screen flex flex-col par une structure qui autorise le défilement normal -->
+  
+<!-- Correction du scroll : Remplacement de min-h-screen flex flex-col par une structure qui autorise le défilement normal -->
   <body class="bg-slate-50 font-sans antialiased text-slate-900 h-full overflow-y-auto">
     
-    <!-- HEADER : Immobile (Glassmorphism) -->
+<!-- HEADER : Immobile (Glassmorphism) -->
     <header
       :if={@current_user}
       class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm"
@@ -39,7 +39,7 @@
       <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-10">
         <div class="flex items-center justify-between h-16">
           
-          <!-- Logo & Brand -->
+<!-- Logo & Brand -->
           <div class="flex items-center group">
             <a
               href="/"
@@ -56,7 +56,7 @@
             </a>
           </div>
           
-          <!-- Status de connexion & Bouton Déconnexion -->
+<!-- Status de connexion & Bouton Déconnexion -->
           <div class="flex items-center gap-4">
             <span class="hidden sm:inline-flex items-center gap-2 text-[11px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 tracking-wide uppercase">
               <span class="relative flex h-2 w-2">
@@ -66,22 +66,21 @@
               </span>
               Connecté
             </span>
-
-            <!-- CORRECTION ICI : Changement de ~p"/users/log_out" vers ~p"/logout" -->
+            
+<!-- CORRECTION ICI : Changement de ~p"/users/log_out" vers ~p"/logout" -->
             <.link
               href={~p"/logout"}
               method="delete"
               class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-100 transition-colors duration-150 shadow-sm"
             >
-              <.icon name="hero-arrow-right-on-rectangle" class="size-4" />
-              Déconnexion
+              <.icon name="hero-arrow-right-on-rectangle" class="size-4" /> Déconnexion
             </.link>
           </div>
         </div>
       </div>
     </header>
     
-    <!-- ZONE CENTRALE : La seule zone qui scrolle -->
+<!-- ZONE CENTRALE : La seule zone qui scrolle -->
     <main class={
       [
         "w-full px-4 sm:px-6 lg:px-10 py-8 grid grid-cols-1 gap-8 min-h-[calc(100vh-140px)]",
@@ -90,11 +89,11 @@
       ]
     }>
       
-      <!-- Sidebar de Navigation Moderne -->
+<!-- Sidebar de Navigation Moderne -->
       <aside :if={@current_user} class="sticky top-20 h-fit max-lg:static">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 transition-shadow hover:shadow-md overflow-hidden">
           
-          <!-- Profil / Branding -->
+<!-- Profil / Branding -->
           <div class="px-5 pt-5 pb-4 border-b border-slate-100">
             <div class="flex items-center gap-3">
               <div class="size-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-sm shrink-0">
@@ -109,10 +108,10 @@
             </div>
           </div>
           
-          <!-- Navigation -->
+<!-- Navigation -->
           <div class="p-4 space-y-5">
             
-            <!-- Section : Événements -->
+<!-- Section : Événements -->
             <div>
               <p class="px-3 mb-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">
                 Événements
@@ -191,7 +190,7 @@
               </ul>
             </div>
             
-            <!-- Section : Système -->
+<!-- Section : Système -->
             <div>
               <p class="px-3 mb-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">
                 Système
@@ -229,7 +228,7 @@
             </div>
           </div>
           
-          <!-- Widget d'info -->
+<!-- Widget d'info -->
           <div class="mx-4 mb-4 p-3.5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100/60">
             <div class="flex items-start gap-2.5">
               <.icon name="hero-light-bulb" class="size-4 text-blue-500 mt-0.5 shrink-0" />
@@ -241,21 +240,21 @@
         </div>
       </aside>
       
-      <!-- Contenu Dynamique -->
+<!-- Contenu Dynamique -->
       <div class="space-y-6">
         <.flash_group flash={@flash} />
         {@inner_content}
       </div>
     </main>
     
-    <!-- FOOTER : Immobile et Moderne -->
+<!-- FOOTER : Immobile et Moderne -->
     <footer
       :if={@current_user}
       class="bg-white/80 backdrop-blur-md border-t border-slate-200 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]"
     >
       <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-10 flex flex-col md:flex-row justify-between items-center gap-6">
         
-        <!-- Copyright & Version -->
+<!-- Copyright & Version -->
         <div class="flex items-center gap-4 text-sm font-medium text-slate-500">
           <span>
             © 2026 <span class="text-slate-900 font-bold tracking-tight">Event-Definition</span>
@@ -266,7 +265,7 @@
           </span>
         </div>
         
-        <!-- Status Pill Central -->
+<!-- Status Pill Central -->
         <div class="flex items-center gap-3 px-4 py-1.5 bg-slate-50 border border-slate-200 rounded-full shadow-inner">
           <span class="relative flex h-2 w-2">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75">
@@ -278,7 +277,7 @@
           </span>
         </div>
         
-        <!-- Liens secondaires -->
+<!-- Liens secondaires -->
         <div class="flex gap-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
           <a href="#" class="hover:text-blue-600 transition-colors">Support</a>
           <a href="#" class="hover:text-blue-600 transition-colors">Docs API</a>
