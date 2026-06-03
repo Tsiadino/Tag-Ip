@@ -60,6 +60,7 @@ defmodule EventDefinitionWeb.Router do
       live "/global-events/new", EventNewLive, :new
       live "/global-events/:id/edit", EventEditLive, :edit
       live "/org-events", OrgEventsLive, :index
+      live "/org-events/:org_id/new-standalone", OrgEventStandaloneNewLive, :new
       live "/org-events/:id/config", OrgEventConfigLive, :config
       live "/monitoring", MonitoringLive, :index
     end
