@@ -1,4 +1,9 @@
 <section class="space-y-6">
+  <.breadcrumbs crumbs={[
+    {"Accueil", "/"},
+    {"Catalogue global", "/global-events"},
+    {"Modifier «#{@form[:code].value}»", ""}
+  ]} />
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 animate-fade-in-up">
     <div class="flex items-center gap-4 mb-4">
       <div class="size-12 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
@@ -225,6 +230,13 @@
                   organisation(s) shadow{(@org_count > 1 && "nt") || ""} cet événement
                 </span>
               </div>
+              <.link
+                navigate="/org-events"
+                class="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <.icon name="hero-arrow-right" class="size-3" />
+                Voir les configurations par organisation
+              </.link>
               <p class="text-xs text-amber-500 mt-2">
                 La modification des champs globaux affectera les organisations qui n'ont pas surchargé ces valeurs.
               </p>
