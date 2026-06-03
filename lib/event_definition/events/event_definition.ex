@@ -67,7 +67,6 @@ defmodule EventDefinition.Events.EventDefinition do
       primary?(true)
 
       accept([
-        :code,
         :name,
         :definition,
         :category,
