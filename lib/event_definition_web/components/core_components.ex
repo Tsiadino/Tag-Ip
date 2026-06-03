@@ -501,4 +501,43 @@ defmodule EventDefinitionWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  Renders breadcrumb navigation.
+
+  ## Examples
+
+      <.breadcrumbs crumbs={[{"Accueil", "/"}, {"Catalogue", "/global-events"}]} />
+  """
+  attr :crumbs, :list,
+    required: true,
+    doc: "list of {label, path} tuples. Last item is rendered as plain text (current page)."
+
+  def breadcrumbs(assigns) do
+    ~H"""
+    <nav
+      class="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-4 animate-fade-in-up"
+      aria-label="Breadcrumb"
+    >
+      <span class="inline-flex items-center gap-1">
+        <.icon name="hero-home" class="size-3" />
+      </span>
+      <%= for {crumb, i} <- Enum.with_index(@crumbs) do %>
+        <%= if i > 0 do %>
+          <span class="text-slate-300">/</span>
+        <% end %>
+        <%= if i < length(@crumbs) - 1 do %>
+          <.link
+            navigate={elem(crumb, 1)}
+            class="hover:text-blue-600 transition-colors duration-150"
+          >
+            {elem(crumb, 0)}
+          </.link>
+        <% else %>
+          <span class="text-slate-600 font-semibold">{elem(crumb, 0)}</span>
+        <% end %>
+      <% end %>
+    </nav>
+    """
+  end
 end
