@@ -99,6 +99,10 @@ defmodule EventDefinitionWeb.MonitoringLive do
      |> assign(monitoring_config: new_config, audit_logs: updated_audit_logs)
      |> assign(selected_org_id: params["organization_id"])
      |> assign(selected_event: params["event_name"])
+     |> push_event("show_toast", %{
+       type: "success",
+       message: "✓ Configuration sauvegardée avec succès"
+     })
      |> put_flash(:info, "Configuration mise à jour et auditée avec succès")}
   end
 
@@ -141,6 +145,10 @@ defmodule EventDefinitionWeb.MonitoringLive do
         {:noreply,
          socket
          |> assign(audit_logs: updated_audit_logs)
+         |> push_event("show_toast", %{
+           type: "info",
+           message: "🚀 Alerte test envoyée pour #{alert_params.event} !"
+         })
          |> put_flash(:info, "Signal envoyé et audité pour #{alert_params.event} !")}
 
       {:error, _} ->
