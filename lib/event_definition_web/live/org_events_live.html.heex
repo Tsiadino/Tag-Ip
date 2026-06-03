@@ -1,4 +1,5 @@
 <div class="space-y-6">
+  <.breadcrumbs crumbs={[{"Accueil", "/"}, {"Config. organisations", "/org-events"}]} />
   <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 animate-fade-in-up">
     <div class="flex items-start justify-between gap-4 flex-wrap">
       <div class="flex items-center gap-4">
@@ -15,6 +16,13 @@
         </div>
       </div>
       <div class="flex gap-2">
+        <.link
+          :if={@selected_org_id}
+          navigate={~p"/org-events/#{@selected_org_id}/new-standalone"}
+          class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-all border border-amber-200"
+        >
+          <.icon name="hero-sparkles" class="size-4" /> Nouvel événement
+        </.link>
         <.link
           navigate="/init"
           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all"
@@ -140,9 +148,18 @@
                   </span>
                 </td>
                 <td class="px-4 py-3.5">
-                  <span class="font-semibold text-slate-900">
-                    {config.resolved_name || config.name}
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-slate-900">
+                      {config.resolved_name || config.name}
+                    </span>
+                    <.link
+                      :if={config.type == "shadow" && config.event_definition_id}
+                      navigate={~p"/global-events/#{config.event_definition_id}/edit"}
+                      class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
+                    >
+                      <.icon name="hero-globe-alt" class="size-3" /> Globale
+                    </.link>
+                  </div>
                 </td>
                 <td class="px-4 py-3.5 hidden sm:table-cell">
                   <span class={[
