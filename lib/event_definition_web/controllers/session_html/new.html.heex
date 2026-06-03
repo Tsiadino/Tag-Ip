@@ -1,25 +1,29 @@
 <Layouts.auth flash={@flash}>
-  <div class="mb-8 text-center">
-    <p class="text-sm uppercase tracking-[0.4em] text-slate-400">Connexion</p>
-    <h1 class="mt-4 text-3xl font-semibold text-slate-900">Bienvenue sur Event-Definition</h1>
-    <p class="mt-2 text-sm text-slate-500">
+  <!-- Réduction de la marge inférieure mb-8 à mb-5 -->
+  <div class="mb-5 text-center">
+    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Connexion</p>
+    <!-- Taille du texte passée de text-3xl à text-2xl pour gagner de la place -->
+    <h1 class="mt-2 text-2xl font-bold text-slate-900">Bienvenue sur Event-Definition</h1>
+    <p class="mt-1.5 text-sm text-slate-500">
       Entrez vos identifiants pour accéder à votre espace sécurisé.
     </p>
   </div>
 
+  <!-- Réduction de la marge mb-6 à mb-4 et réduction du padding p-4 à p-3 -->
   <%= if error = Phoenix.Flash.get(@flash, :error) do %>
-    <div class="mb-6 rounded-2xl bg-red-50 border border-red-100 p-4 text-sm text-red-700">
+    <div class="mb-4 rounded-xl bg-red-50 border border-red-100 p-3 text-sm text-red-700 text-center font-medium shadow-sm">
       {error}
     </div>
   <% end %>
 
-  <.form for={@form} id="login-form" action={~p"/login"} method="post" class="space-y-6">
+  <!-- Passage de space-y-6 à space-y-4.5 pour compacter le bloc formulaire -->
+  <.form for={@form} id="login-form" action={~p"/login"} method="post" class="space-y-4.5">
     <.input
       field={@form[:email]}
       type="email"
       label="Email"
       required
-      class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
     />
 
     <.input
@@ -27,24 +31,25 @@
       type="password"
       label="Mot de passe"
       required
-      class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
     />
 
-    <div class="flex justify-between items-center text-xs uppercase tracking-[0.28em] text-slate-500">
-      <.link navigate="/reset-password" class="hover:text-blue-600 transition-colors">
+    <div class="flex justify-between items-center text-xs uppercase tracking-[0.18em] text-slate-500 py-1">
+      <.link navigate="/reset-password" class="hover:text-blue-600 transition-colors underline underline-offset-4">
         Mot de passe oublié ?
       </.link>
       <.link
         navigate="/register"
-        class="text-blue-600 font-bold hover:text-blue-800 transition-colors"
+        class="text-blue-600 font-bold hover:text-blue-800 transition-colors underline underline-offset-4"
       >
         Créer un compte
       </.link>
     </div>
 
+    <!-- Changement du bouton en bleu bg-blue-600 et réduction légère de la marge interne (py-2.5) -->
     <button
       type="submit"
-      class="w-full rounded-2xl bg-slate-900 py-3 text-sm font-semibold uppercase tracking-[0.24em] text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
+      class="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-blue-500 transition-colors"
     >
       Se connecter
     </button>
