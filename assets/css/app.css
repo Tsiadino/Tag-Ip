@@ -22,6 +22,16 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(24px); }
+}
+
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 8px rgba(99, 102, 241, 0.3); }
   50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
@@ -39,6 +49,14 @@
   animation: slideIn 0.3s ease-out both;
 }
 
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out both;
+}
+
+.animate-slide-out-right {
+  animation: slideOutRight 0.3s ease-out both;
+}
+
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
@@ -49,3 +67,4 @@
 .delay-4 { animation-delay: 0.4s; }
 .delay-5 { animation-delay: 0.5s; }
 .delay-6 { animation-delay: 0.6s; }
+
