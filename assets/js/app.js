@@ -25,12 +25,13 @@ import {LiveSocket} from "phoenix_live_view"
 // Commenté pour corriger l'erreur de build d'esbuild
 // import {hooks as colocatedHooks} from "phoenix-colocated/event_definition"
 import topbar from "../vendor/topbar"
+import Toast from "./hooks/toast"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {}, // Initialisé à vide sans colocatedHooks
+  hooks: { Toast }, // Toast hook pour les notifications
 })
 
 // Show progress bar on live navigation and form submits
