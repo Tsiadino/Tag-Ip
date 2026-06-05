@@ -68,3 +68,22 @@
 .delay-5 { animation-delay: 0.5s; }
 .delay-6 { animation-delay: 0.6s; }
 
+/* Custom scrollbar for independent content scrolling */
+.scrollable::-webkit-scrollbar,
+main::-webkit-scrollbar,
+div::-webkit-scrollbar { width: 6px; height: 6px; }
+.scrollable::-webkit-scrollbar-track,
+main::-webkit-scrollbar-track,
+div::-webkit-scrollbar-track { background: transparent; }
+.scrollable::-webkit-scrollbar-thumb,
+main::-webkit-scrollbar-thumb,
+div::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.scrollable::-webkit-scrollbar-thumb:hover,
+main::-webkit-scrollbar-thumb:hover,
+div::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Firefox scrollbar */
+.scrollable,
+main,
+div { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+
