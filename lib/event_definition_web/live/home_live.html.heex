@@ -1,5 +1,6 @@
 <div class="space-y-6">
   <.breadcrumbs crumbs={[{"Accueil", "/"}]} />
+
   <div class="bg-white rounded-xl p-6 md:p-8 shadow-sm border border-slate-200 animate-fade-in-up">
     <div class="flex items-center gap-4 mb-5">
       <div class="size-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-sm shrink-0">
@@ -18,7 +19,7 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 animate-fade-in-up delay-1">
+    <div class="group bg-white rounded-xl p-6 shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 animate-fade-in-up delay-1">
       <div class="size-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-sm mb-4">
         <.icon name="hero-globe-alt" class="size-5 text-white" />
       </div>
@@ -26,7 +27,7 @@
       <p class="text-sm text-slate-500 leading-relaxed mb-5">
         Suivez le nombre total de définitions globales importées depuis le CSV.
       </p>
-      <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-200 mb-5">
+      <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-200 mb-5 group-hover:border-blue-200 transition-colors">
         <p class="text-3xl font-extrabold text-blue-600">{@event_count}</p>
         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
           Événements globaux
@@ -40,7 +41,7 @@
       </.link>
     </div>
 
-    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 animate-fade-in-up delay-2">
+    <div class="group bg-white rounded-xl p-6 shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 animate-fade-in-up delay-2">
       <div class="size-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-sm mb-4">
         <.icon name="hero-building-office" class="size-5 text-white" />
       </div>
@@ -48,7 +49,7 @@
       <p class="text-sm text-slate-500 leading-relaxed mb-5">
         Activez et personnalisez les événements par organisation.
       </p>
-      <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-200 mb-5">
+      <div class="bg-slate-50 rounded-xl p-4 text-center border border-slate-200 mb-5 group-hover:border-blue-200 transition-colors">
         <p class="text-3xl font-extrabold text-slate-900">{@org_count}</p>
         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
           Organisations
