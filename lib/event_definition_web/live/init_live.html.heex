@@ -52,10 +52,20 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 animate-fade-in-up delay-2">
-    <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-      <.icon name="hero-cog-8-tooth" class="size-4 text-blue-600" /> Actions globales
-    </h2>
+  <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-blue-500 border-t border-b border-r border-slate-200 animate-fade-in-up delay-2">
+    <div class="flex items-start gap-3 mb-4">
+      <div class="size-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+        <.icon name="hero-cog-8-tooth" class="size-4 text-blue-600" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <h2 class="text-base font-bold text-slate-900">Actions globales</h2>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Ces actions agissent sur <strong>tout le catalogue</strong>
+          d'événements (toutes les définitions actives/inactives).
+          Les modifications sont visibles sur le tableau de bord.
+        </p>
+      </div>
+    </div>
     <div class="flex flex-wrap gap-3">
       <button
         phx-click="activate_all"
@@ -78,15 +88,27 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 animate-fade-in-up delay-3">
+  <div class="bg-white rounded-xl p-5 shadow-sm border-l-4 border-amber-500 border-t border-b border-r border-slate-200 animate-fade-in-up delay-3">
+    <div class="flex items-start gap-3 mb-4">
+      <div class="size-9 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+        <.icon name="hero-building-office-2" class="size-4 text-amber-600" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <h2 class="text-base font-bold text-slate-900">Organisation cible</h2>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Ces actions agissent sur <strong>une organisation spécifique</strong>. Les événements sélectionnés seront configurés
+          uniquement pour l'organisation choisie.
+        </p>
+      </div>
+    </div>
     <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">
-      Organisation cible
+      Sélectionnez une organisation
     </label>
     <div class="relative max-w-sm">
       <select
         phx-change="select-org"
         name="org_id"
-        class="w-full px-4 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-slate-700 appearance-none cursor-pointer"
+        class="w-full px-4 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition-all outline-none text-sm font-medium text-slate-700 appearance-none cursor-pointer"
       >
         <option value="">Sélectionner une organisation</option>
         <%= for org <- @organizations do %>
@@ -171,8 +193,8 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 animate-fade-in-up delay-5">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
+          <thead class="sticky top-0 z-10 bg-slate-50">
+            <tr class="border-b border-slate-200">
               <th class="px-4 py-3.5 w-10"></th>
               <th class="px-4 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Code
@@ -281,11 +303,11 @@
       <div></div>
       <button
         phx-click="apply-init"
-        class="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        class="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={@selected_ids == []}
       >
         <.icon name="hero-rocket-launch" class="size-4" />
-        Appliquer la sélection ({length(@selected_ids)})
+        Appliquer à l'organisation ({length(@selected_ids)})
       </button>
     </div>
   <% end %>

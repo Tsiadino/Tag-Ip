@@ -64,6 +64,14 @@ defmodule EventDefinitionWeb.InitLive do
     selected_ids = socket.assigns.selected_ids
 
     if org_id && selected_ids != [] do
+      org_name =
+        socket.assigns.organizations
+        |> Enum.find(&(&1.id == org_id))
+        |> case do
+          nil -> "l'organisation cible"
+          org -> org.name
+        end
+
       count = initialize_org(org_id, selected_ids)
 
       Phoenix.PubSub.broadcast(
@@ -74,7 +82,7 @@ defmodule EventDefinitionWeb.InitLive do
 
       {:noreply,
        socket
-       |> put_flash(:info, "#{count} configuration(s) créée(s) avec succès !")
+       |> put_flash(:info, "🎯 #{count} configuration(s) ajoutée(s) à #{org_name}")
        |> refresh_all_data()}
     else
       {:noreply,
@@ -107,12 +115,13 @@ defmodule EventDefinitionWeb.InitLive do
 
     {:noreply,
      socket
-     |> put_flash(:info, "#{name} créée !")
+     |> put_flash(:info, "🏢 Organisation « #{name} » (#{slug}) créée avec succès")
      |> refresh_all_data()}
   end
 
   @impl true
   def handle_event("activate_all", _params, socket) do
+    count = Repo.aggregate(from(e in "event_definitions"), :count, :id)
     from(e in "event_definitions") |> Repo.update_all(set: [active: true])
 
     Phoenix.PubSub.broadcast(
@@ -123,12 +132,13 @@ defmodule EventDefinitionWeb.InitLive do
 
     {:noreply,
      socket
-     |> put_flash(:info, "Tous les événements ont été activés")
+     |> put_flash(:info, "✅ Action globale — #{count} événement(s) activé(s) dans le catalogue")
      |> refresh_all_data()}
   end
 
   @impl true
   def handle_event("deactivate_all", _params, socket) do
+    count = Repo.aggregate(from(e in "event_definitions"), :count, :id)
     from(e in "event_definitions") |> Repo.update_all(set: [active: false])
 
     Phoenix.PubSub.broadcast(
@@ -139,7 +149,10 @@ defmodule EventDefinitionWeb.InitLive do
 
     {:noreply,
      socket
-     |> put_flash(:info, "Tous les événements ont été désactivés")
+     |> put_flash(
+       :info,
+       "⏸️ Action globale — #{count} événement(s) désactivé(s) dans le catalogue"
+     )
      |> refresh_all_data()}
   end
 
