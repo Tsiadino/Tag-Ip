@@ -29,12 +29,12 @@
   </head>
   
 <!-- Correction du scroll : Remplacement de min-h-screen flex flex-col par une structure qui autorise le défilement normal -->
-  <body class="bg-slate-50 font-sans antialiased text-slate-900 h-full overflow-y-auto">
+  <body class="bg-slate-50 font-sans antialiased text-slate-900 h-screen overflow-hidden flex flex-col">
     
-<!-- HEADER : Immobile (Glassmorphism) -->
+<!-- HEADER : Immobile (shrink-0 = toujours visible en haut) -->
     <header
       :if={@current_user}
-      class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm"
+      class="shrink-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm"
     >
       <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-10">
         <div class="flex items-center justify-between h-16">
@@ -66,8 +66,6 @@
               </span>
               Connecté
             </span>
-            
-<!-- CORRECTION ICI : Changement de ~p"/users/log_out" vers ~p"/logout" -->
             <.link
               href={~p"/logout"}
               method="delete"
@@ -80,18 +78,15 @@
       </div>
     </header>
     
-<!-- ZONE CENTRALE : La seule zone qui scrolle -->
-    <main class={
-      [
-        "w-full px-4 sm:px-6 lg:px-10 py-8 grid grid-cols-1 gap-8 min-h-[calc(100vh-140px)]",
-        # N'applique la grille 2 colonnes que si connecté
-        @current_user && "lg:grid-cols-[280px_1fr]"
-      ]
-    }>
+<!-- APP SHELL : Sidebar (fixe) + Contenu (scrollable) -->
+    <div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
       
-<!-- Sidebar de Navigation Moderne -->
-      <aside :if={@current_user} class="sticky top-20 h-fit max-lg:static">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 transition-shadow hover:shadow-md overflow-hidden">
+<!-- SIDEBAR : Navigation fixe à gauche -->
+      <aside
+        :if={@current_user}
+        class="w-full lg:w-[280px] shrink-0 overflow-y-auto bg-white border-b lg:border-b-0 lg:border-r border-slate-200/60"
+      >
+        <div class="bg-white rounded-2xl lg:rounded-none shadow-sm lg:shadow-none border-0 lg:border-0 transition-shadow overflow-hidden">
           
 <!-- Profil / Branding -->
           <div class="px-5 pt-5 pb-4 border-b border-slate-100">
@@ -240,17 +235,19 @@
         </div>
       </aside>
       
-<!-- Contenu Dynamique -->
-      <div class="space-y-6">
-        <.flash_group flash={@flash} />
-        {@inner_content}
+<!-- CONTENU PRINCIPAL : Zone de scroll indépendante avec largeur max centrée -->
+      <div class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-8">
+        <div class="mx-auto max-w-7xl">
+          <.flash_group flash={@flash} />
+          {@inner_content}
+        </div>
       </div>
-    </main>
+    </div>
     
-<!-- FOOTER : Immobile et Moderne -->
+<!-- FOOTER : Toujours en bas -->
     <footer
       :if={@current_user}
-      class="bg-white/80 backdrop-blur-md border-t border-slate-200 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]"
+      class="shrink-0 bg-white/80 backdrop-blur-md border-t border-slate-200 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]"
     >
       <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-10 flex flex-col md:flex-row justify-between items-center gap-6">
         
