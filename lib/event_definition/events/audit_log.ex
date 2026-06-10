@@ -10,11 +10,12 @@ defmodule EventDefinition.Events.AuditLog do
 
   attributes do
     uuid_primary_key(:id)
-    attribute(:user, :string, allow_nil?: false)
-    attribute(:action, :string, allow_nil?: false)
-    attribute(:event, :string, allow_nil?: false)
-
-    # On utilise timestamps() pour avoir inserted_at automatiquement
+    attribute(:organization_id, :uuid, allow_nil?: false, public?: true)
+    attribute(:event_id, :uuid, public?: true)
+    attribute(:action, :string, allow_nil?: false, public?: true)
+    attribute(:details, :map, public?: true, default: %{})
+    attribute(:user, :string, public?: true)
+    attribute(:timestamp, :utc_datetime_usec, allow_nil?: false, public?: true)
     timestamps()
   end
 
@@ -22,8 +23,7 @@ defmodule EventDefinition.Events.AuditLog do
     defaults([:read])
 
     create :create do
-      # Ajoute cette ligne pour autoriser l'écriture de ces champs
-      accept([:user, :action, :event])
+      accept([:organization_id, :event_id, :action, :details, :user, :timestamp])
     end
   end
 end
