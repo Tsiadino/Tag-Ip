@@ -279,7 +279,8 @@
           <%= for log <- @audit_logs do %>
             <tr class="hover:bg-slate-50 transition-colors duration-150">
               <td class="px-5 py-3.5 text-slate-500 font-mono text-xs whitespace-nowrap">
-                {Calendar.strftime(log.inserted_at, "%d/%m/%Y %H:%M:%S")}
+                <% local_dt = DateTime.add(log.inserted_at, 3 * 60 * 60, :second) %>
+                {Calendar.strftime(local_dt, "%d/%m/%Y %H:%M:%S")}
               </td>
               <td class="px-5 py-3.5">
                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded bg-slate-100 text-slate-700">
@@ -288,7 +289,7 @@
                 </span>
               </td>
               <td class="px-5 py-3.5 text-slate-700 font-medium">{log.action}</td>
-              <td class="px-5 py-3.5 text-slate-500 max-w-[200px] truncate">{inspect(log.details, width: 0)}</td>
+              <td class="px-5 py-3.5 text-slate-500 max-w-[200px] truncate">{Map.get(log.details, "event_code", "") || Map.get(log.details, :event_code, "")}</td>
             </tr>
           <% end %>
           <%= if @audit_logs == [] do %>
