@@ -154,17 +154,13 @@
               <td class="px-5 py-3.5 text-slate-500 font-mono text-xs">
                 {Calendar.strftime(log.timestamp, "%H:%M:%S")}
               </td>
-              <td class="px-5 py-3.5 text-slate-800 font-medium">{log.event}</td>
+              <td class="px-5 py-3.5 text-slate-800 font-medium">{log.event_code}</td>
               <td class="px-5 py-3.5 text-slate-500 hidden sm:table-cell">
                 {if log.organization, do: log.organization.name, else: "N/A"}
               </td>
               <td class="px-5 py-3.5">
-                <span class={[
-                  "inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full",
-                  log.status == "sent" && "text-blue-700 bg-blue-50 border border-blue-200",
-                  log.status == "pending" && "text-slate-500 bg-slate-50 border border-slate-200"
-                ]}>
-                  {if log.status == "sent", do: "Envoyé", else: "En attente"}
+                <span class="inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full text-slate-500 bg-slate-50 border border-slate-200">
+                  {log.event_code}
                 </span>
               </td>
             </tr>
@@ -209,7 +205,7 @@
                 </span>
               </td>
               <td class="px-5 py-3.5 text-slate-700 font-medium">{log.action}</td>
-              <td class="px-5 py-3.5 text-slate-500 hidden md:table-cell">{log.event}</td>
+              <td class="px-5 py-3.5 text-slate-500 hidden md:table-cell max-w-[200px] truncate">{inspect(log.details, width: 0)}</td>
             </tr>
           <% end %>
         </tbody>

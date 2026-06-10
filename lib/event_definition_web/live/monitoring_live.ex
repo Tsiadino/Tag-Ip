@@ -6,10 +6,8 @@ defmodule EventDefinitionWeb.MonitoringLive do
     if connected?(socket),
       do: Phoenix.PubSub.subscribe(EventDefinition.PubSub, "monitoring_alerts")
 
-    # 1. Récupération des organisations
     organizations = EventDefinition.Accounts.Organization |> Ash.read!()
 
-    # 2. Récupération DYNAMIQUE (Depuis le CSV importé en DB)
     event_types =
       EventDefinition.Events.EventDefinition
       |> Ash.read!()
@@ -17,14 +15,12 @@ defmodule EventDefinitionWeb.MonitoringLive do
       |> Enum.uniq()
       |> Enum.sort()
 
-    # 3. Chargement de l'historique
     alert_logs =
       EventDefinition.Events.AlertLog
       |> Ash.Query.sort(timestamp: :desc)
       |> Ash.Query.load([:organization])
       |> Ash.read!()
 
-    # 4. Chargement de l'Audit Trail
     audit_logs =
       EventDefinition.Events.AuditLog
       |> Ash.Query.sort(inserted_at: :desc)
@@ -57,7 +53,7 @@ defmodule EventDefinitionWeb.MonitoringLive do
     {:noreply,
      socket
      |> assign(alert_logs: [alert_loaded | socket.assigns.alert_logs])
-     |> put_flash(:info, "Nouvelle alerte reçue : #{alert_loaded.event}")}
+     |> put_flash(:info, "Nouvelle alerte reçue : #{alert_loaded.event_code}")}
   end
 
   @impl true
@@ -79,9 +75,11 @@ defmodule EventDefinitionWeb.MonitoringLive do
     }
 
     audit_params = %{
-      user: "Fannie",
+      organization_id: params["organization_id"],
       action: "Modification Config",
-      event: "Nouvelle config sauvegardée (Polling: #{params["polling_interval"]}s)"
+      details: %{polling_interval: params["polling_interval"], webhook_url: params["webhook_url"]},
+      user: "Fannie",
+      timestamp: DateTime.utc_now() |> DateTime.truncate(:second)
     }
 
     EventDefinition.Events.AuditLog
@@ -111,9 +109,11 @@ defmodule EventDefinitionWeb.MonitoringLive do
     webhook_url = socket.assigns.monitoring_config.webhook_url
 
     alert_params = %{
-      event: socket.assigns.selected_event,
+      event_code: socket.assigns.selected_event,
       organization_id: socket.assigns.selected_org_id,
-      status: "sent",
+      alert_type: "webhook_test",
+      severity: "info",
+      message: "Test webhook pour #{socket.assigns.selected_event}",
       timestamp: DateTime.utc_now() |> DateTime.truncate(:second)
     }
 
@@ -130,9 +130,11 @@ defmodule EventDefinitionWeb.MonitoringLive do
         )
 
         audit_params = %{
-          user: "Fannie",
+          organization_id: socket.assigns.selected_org_id,
           action: "Test Webhook",
-          event: "Alerte test envoyée : #{alert_params.event}"
+          details: %{event_code: alert_params.event_code, message: alert_params.message},
+          user: "Fannie",
+          timestamp: DateTime.utc_now() |> DateTime.truncate(:second)
         }
 
         EventDefinition.Events.AuditLog
@@ -147,9 +149,9 @@ defmodule EventDefinitionWeb.MonitoringLive do
          |> assign(audit_logs: updated_audit_logs)
          |> push_event("show_toast", %{
            type: "info",
-           message: "🚀 Alerte test envoyée pour #{alert_params.event} !"
+           message: "🚀 Alerte test envoyée pour #{alert_params.event_code} !"
          })
-         |> put_flash(:info, "Signal envoyé et audité pour #{alert_params.event} !")}
+         |> put_flash(:info, "Signal envoyé et audité pour #{alert_params.event_code} !")}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Erreur d'enregistrement PostgreSQL")}

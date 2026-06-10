@@ -1,6 +1,5 @@
 defmodule EventDefinition.Events.AlertLog do
   use Ash.Resource,
-    # On reste dans le même domaine que tes autres ressources
     domain: EventDefinition.Domain,
     data_layer: AshPostgres.DataLayer
 
@@ -11,36 +10,19 @@ defmodule EventDefinition.Events.AlertLog do
 
   attributes do
     uuid_primary_key(:id)
-
-    # On stocke l'événement (ex: "Vitesse > 90 km/h")
-    attribute :event, :string do
-      allow_nil?(false)
-      public?(true)
-    end
-
-    # Statut de l'envoi (Envoyé, En attente)
-    attribute :status, :string do
-      allow_nil?(false)
-      default("sent")
-      public?(true)
-    end
-
-    # Horodatage précis de l'alerte
-    attribute :timestamp, :utc_datetime do
-      allow_nil?(false)
-      default(&DateTime.utc_now/0)
-      public?(true)
-    end
-
-    # ID de l'organisation pour la liaison SQL
-    attribute :organization_id, :uuid do
-      allow_nil?(false)
-      public?(true)
-    end
+    attribute(:organization_id, :uuid, allow_nil?: false, public?: true)
+    attribute(:event_code, :string, allow_nil?: false, public?: true)
+    attribute(:alert_type, :string, public?: true)
+    attribute(:severity, :string, public?: true)
+    attribute(:message, :string, public?: true)
+    attribute(:vehicle_id, :string, public?: true)
+    attribute(:gps_latitude, :float, public?: true)
+    attribute(:gps_longitude, :float, public?: true)
+    attribute(:metadata, :map, public?: true, default: %{})
+    attribute(:timestamp, :utc_datetime_usec, allow_nil?: false, public?: true)
   end
 
   relationships do
-    # On lie l'alerte à une organisation existante
     belongs_to :organization, EventDefinition.Accounts.Organization do
       source_attribute(:organization_id)
     end
@@ -49,9 +31,19 @@ defmodule EventDefinition.Events.AlertLog do
   actions do
     defaults([:read, :destroy])
 
-    # Action utilisée par ton Webhook pour insérer une alerte
     create :create do
-      accept([:event, :status, :timestamp, :organization_id])
+      accept([
+        :organization_id,
+        :event_code,
+        :alert_type,
+        :severity,
+        :message,
+        :vehicle_id,
+        :gps_latitude,
+        :gps_longitude,
+        :metadata,
+        :timestamp
+      ])
     end
   end
 end
