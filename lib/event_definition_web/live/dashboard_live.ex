@@ -128,10 +128,10 @@ defmodule EventDefinitionWeb.DashboardLive do
         id: al.id,
         user: al.user,
         action: al.action,
-        event: al.event,
-        inserted_at: al.inserted_at
+        details: al.details,
+        inserted_at: al.timestamp
       },
-      order_by: [desc: al.inserted_at],
+      order_by: [desc: al.timestamp],
       limit: 15
     )
     |> Repo.all()

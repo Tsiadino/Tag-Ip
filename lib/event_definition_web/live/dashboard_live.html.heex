@@ -288,7 +288,7 @@
                 </span>
               </td>
               <td class="px-5 py-3.5 text-slate-700 font-medium">{log.action}</td>
-              <td class="px-5 py-3.5 text-slate-500">{log.event}</td>
+              <td class="px-5 py-3.5 text-slate-500 max-w-[200px] truncate">{inspect(log.details, width: 0)}</td>
             </tr>
           <% end %>
           <%= if @audit_logs == [] do %>
