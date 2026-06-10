@@ -152,7 +152,8 @@
           <%= for log <- @alert_logs do %>
             <tr class="hover:bg-slate-50 transition-colors duration-150">
               <td class="px-5 py-3.5 text-slate-500 font-mono text-xs">
-                {Calendar.strftime(log.timestamp, "%H:%M:%S")}
+                <% local = DateTime.add(log.timestamp, 3 * 60 * 60, :second) %>
+                {Calendar.strftime(local, "%H:%M:%S")}
               </td>
               <td class="px-5 py-3.5 text-slate-800 font-medium">{log.event_code}</td>
               <td class="px-5 py-3.5 text-slate-500 hidden sm:table-cell">
@@ -160,7 +161,7 @@
               </td>
               <td class="px-5 py-3.5">
                 <span class="inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full text-slate-500 bg-slate-50 border border-slate-200">
-                  {log.event_code}
+                  {log.alert_type || "inconnu"}
                 </span>
               </td>
             </tr>
@@ -196,7 +197,8 @@
           <%= for log <- @audit_logs do %>
             <tr class="hover:bg-slate-50 transition-colors duration-150">
               <td class="px-5 py-3.5 text-slate-500 font-mono text-xs">
-                {Calendar.strftime(log.inserted_at, "%H:%M:%S")}
+                <% local_audit = DateTime.add(log.inserted_at, 3 * 60 * 60, :second) %>
+                {Calendar.strftime(local_audit, "%H:%M:%S")}
               </td>
               <td class="px-5 py-3.5">
                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded bg-slate-100 text-slate-700">
@@ -205,7 +207,7 @@
                 </span>
               </td>
               <td class="px-5 py-3.5 text-slate-700 font-medium">{log.action}</td>
-              <td class="px-5 py-3.5 text-slate-500 hidden md:table-cell max-w-[200px] truncate">{inspect(log.details, width: 0)}</td>
+              <td class="px-5 py-3.5 text-slate-500 hidden md:table-cell max-w-[200px] truncate">{Map.get(log.details, "event_code", "") || Map.get(log.details, :event_code, "")}</td>
             </tr>
           <% end %>
         </tbody>
