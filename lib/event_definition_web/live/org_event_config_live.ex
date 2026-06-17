@@ -12,6 +12,16 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
     oed = load_org_event_def(id)
 
     if oed do
+      organizations = load_orgs()
+
+      org_options =
+        Enum.map(organizations, fn org ->
+          {org.name <> " (" <> org.slug <> ")", org.id}
+        end)
+
+      org_map =
+        Map.new(organizations, fn org -> {org.id, org.name} end)
+
       form =
         oed
         |> Map.take([
@@ -24,7 +34,8 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
           :level_group,
           :occurrence_rule,
           :alert_mode,
-          :enabled
+          :enabled,
+          :organization_id
         ])
         |> Map.update!(:category, fn
           nil -> ""
@@ -51,6 +62,9 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
        |> assign(:form, form)
        |> assign(:oed_id, id)
        |> assign(:oed, oed)
+       |> assign(:organizations, org_options)
+       |> assign(:org_map, org_map)
+       |> assign(:selected_org, oed.organization_id)
        |> assign(:codes, distinct_values(:code))
        |> assign(:names, distinct_values(:name))
        |> assign(:classes, Enum.uniq(distinct_values(:class) ++ @spec_classes))
@@ -66,11 +80,16 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
 
   @impl true
   def handle_event("validate", %{"org_event_definition" => params}, socket) do
+    selected_org = Map.get(params, "organization_id")
+
     form =
       params
       |> then(fn p -> to_form(p, as: :org_event_definition) end)
 
-    {:noreply, assign(socket, :form, form)}
+    {:noreply,
+     socket
+     |> assign(:form, form)
+     |> assign(:selected_org, selected_org)}
   end
 
   @impl true
@@ -139,6 +158,7 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
       where: oed.id == type(^binary_id, Ecto.UUID),
       select: %{
         id: oed.id,
+        organization_id: oed.organization_id,
         code: oed.code,
         name: oed.name,
         definition: oed.definition,
@@ -159,6 +179,7 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
       result ->
         result
         |> Map.put(:id, normalize_uuid(result.id))
+        |> Map.put(:organization_id, normalize_uuid(result.organization_id))
     end
   end
 
@@ -201,6 +222,15 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
   end
 
   defp parse_json_map(map) when is_map(map), do: map
+
+  defp load_orgs do
+    from(o in "organizations",
+      select: %{id: o.id, name: o.name, slug: o.slug},
+      order_by: [asc: o.name]
+    )
+    |> Repo.all()
+    |> Enum.map(fn org -> %{org | id: normalize_uuid(org.id)} end)
+  end
 
   defp distinct_values(field) do
     from(e in "event_definitions",
