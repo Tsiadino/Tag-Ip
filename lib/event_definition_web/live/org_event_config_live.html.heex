@@ -31,6 +31,16 @@
       >
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="space-y-5">
+            <div class="col-span-1 md:col-span-2">
+              <.input
+                field={@form[:organization_id]}
+                type="select"
+                label="Organisation Cliente"
+                prompt="Sélectionner une organisation"
+                options={@organizations}
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+              />
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <.input
                 field={@form[:code]}
@@ -154,6 +164,12 @@
                 <.icon name="hero-information-circle" class="size-4" /> Résumé
               </div>
               <div class="space-y-1 text-sm text-blue-700">
+                <p>
+                  <span class="font-semibold">Organisation Active :</span>
+                  <span class="bg-blue-200 px-2 py-0.5 rounded text-xs font-bold font-mono">
+                    {@org_map[@selected_org] || "Aucune organisation sélectionnée"}
+                  </span>
+                </p>
                 <p><span class="font-semibold">Code :</span> {@form[:code].value || "—"}</p>
                 <p><span class="font-semibold">Nom :</span> {@form[:name].value || "—"}</p>
                 <p>
