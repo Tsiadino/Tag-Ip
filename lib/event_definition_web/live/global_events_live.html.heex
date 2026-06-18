@@ -292,7 +292,11 @@
             <button type="button" phx-click="close-modal" class="px-4 py-2 text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 rounded-lg border border-slate-300 transition-all">
               Annuler
             </button>
-            <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all">
+            <button 
+              type="submit" 
+              phx-disable-with="Création en cours..."
+              class="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all"
+            >
               Créer
             </button>
           </div>
