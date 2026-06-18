@@ -167,8 +167,47 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
 
   # Les autres fonctions (toggle-active, delete-event, etc.) restent identiques...
   @impl true
-  def handle_event("save-new", _, socket), do: {:noreply, socket} # Simplifié pour l'exemple
+  def handle_event("save-new", params, socket) do
+    attrs = %{
+      code: params["code"],
+      name: params["name"],
+      monitor_type: params["monitor_type"],
+      level: String.to_integer(params["level"] || "1"),
+      definition: params["description"],
+      # Utilisation de la fonction de sécurité ici :
+      category: safe_to_atom(params["category"]), 
+      class: safe_to_atom(params["class"]),
+      level_group: params["level_group"]
+    }
+
+    case Ash.create(EventDefinition.Events.EventDefinition, attrs) do
+      {:ok, _event} ->
+        {:noreply,
+        socket
+        |> put_flash(:info, "Événement créé avec succès.")
+        |> assign(modal: nil, events: load_events())}
+
+      {:error, changeset} ->
+        {:noreply, put_flash(socket, :error, "Erreur lors de la création : #{inspect(changeset.errors)}")}
+    end
+  end
   
+  defp safe_to_atom(value) when value in ["", nil], do: nil
+
+  defp safe_to_atom(value) when is_binary(value) do
+    # Liste combinée de toutes les valeurs possibles pour éviter le :unknown
+    allowed_values = [
+      "physical", "derived", "system", "alarm", "fuel", "information", "infraction",
+      "movement", "power", "connectivity", "speed", "geofence", "driving", "accelerometer", "unknown"
+    ]
+    
+    if value in allowed_values do
+      String.to_atom(value)
+    else
+      :unknown
+    end
+  end
+
   @impl true
   def handle_event("toggle-active", %{"id" => id}, socket) do
     # 1. Récupère l'objet
@@ -192,31 +231,18 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
   
   @impl true
   def handle_event("delete-event", %{"id" => id}, socket) do
-    # 1. Conversion sécurisée de l'ID string/UUID en binaire pour Postgres
-    binary_id = Ecto.UUID.dump!(to_string(id))
+    event = Ash.get!(EventDefinition.Events.EventDefinition, id)
 
-    # 2. Suppression directe en base de données avec Ecto.Query
-    case from(e in "event_definitions", where: e.id == ^binary_id) |> Repo.delete_all() do
-      {number_of_deleted_rows, _} when number_of_deleted_rows > 0 ->
-        # 3. Notification PubSub si d'autres composants écoutent
-        Phoenix.PubSub.broadcast(
-          EventDefinition.PubSub,
-          "global_events",
-          {:event_deleted, id}
-        )
-
+    case Ash.destroy(event) do
+      :ok ->
         {:noreply,
-         socket
-         |> put_flash(:info, "Événement supprimé avec succès.")
-         |> assign(:events, load_events())} # Recharge proprement la liste rafraîchie
+        socket
+        |> put_flash(:info, "Événement supprimé.")
+        |> assign(:events, load_events())}
 
-      _ ->
-        {:noreply, put_flash(socket, :error, "Impossible de supprimer cet événement ou déjà inexistant.")}
+      {:error, _error} ->
+        {:noreply, put_flash(socket, :error, "Impossible de supprimer.")}
     end
-  rescue  
-    exception ->
-      # Sécurité en cas d'erreur de conversion d'UUID
-      {:noreply, put_flash(socket, :error, "Erreur lors de la suppression : #{Exception.message(exception)}")}
   end
   
   @impl true
@@ -232,13 +258,11 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
   @impl true
   def handle_info(_msg, socket), do: {:noreply, socket}
 
+  @impl true
   defp load_events do
-    from(e in "event_definitions",
-      select: %{id: e.id, code: e.code, name: e.name, definition: e.definition, category: e.category, class: e.class, level: e.level, level_group: e.level_group, monitor_type: e.monitor_type, active: e.active},
-      order_by: e.code
-    )
-    |> Repo.all()
-    |> Enum.map(fn event -> %{event | id: normalize_uuid(event.id)} end)
+    EventDefinition.Events.EventDefinition
+    |> Ash.read!()
+    |> Enum.sort_by(& &1.code)
   end
 
   defp normalize_uuid(id) when is_binary(id) do
