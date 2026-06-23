@@ -8,7 +8,10 @@ defmodule EventDefinitionWeb.DashboardLive do
   def mount(_params, _session, socket) do
     if connected?(socket), do: Phoenix.PubSub.subscribe(EventDefinition.PubSub, "global_events")
 
-    {:ok, assign_dashboard(socket)}
+    {:ok,
+     socket
+     |> assign(show_init_modal: false, selected_org: nil, selected_configs: [])
+     |> assign_dashboard()}
   end
 
   @impl true
@@ -16,6 +19,53 @@ defmodule EventDefinitionWeb.DashboardLive do
     alerts = Enum.reject(socket.assigns.alerts, &(to_string(&1.id) == id))
     {:noreply, assign(socket, :alerts, alerts)}
   end
+
+  # --- GESTION DU MODAL D'INITIALISATION ET D'ACTIVATION DES ÉVÉNEMENTS ---
+
+  @impl true
+  def handle_event("open_init_modal", %{"org_id" => org_id}, socket) do
+    orgs = socket.assigns.organizations
+    org = Enum.find(orgs, &(&1.id == org_id))
+
+    # Filtrer les configurations appartenant à l'organisation sélectionnée
+    org_configs = Enum.filter(socket.assigns.org_event_defs, &(&1.organization_id == org_id))
+
+    {:noreply,
+     socket
+     |> assign(show_init_modal: true, selected_org: org, selected_configs: org_configs)}
+  end
+
+  @impl true
+  def handle_event("close_modal", _, socket) do
+    {:noreply, assign(socket, show_init_modal: false, selected_org: nil, selected_configs: [])}
+  end
+
+  @impl true
+  def handle_event("toggle_config_activation", %{"config_id" => config_id}, socket) do
+    # 1. Trouver la configuration actuelle dans notre état local (socket)
+    current_config = Enum.find(socket.assigns.org_event_defs, &(&1.id == config_id))
+
+    if current_config do
+      # 2. Inverser l'état actuel (!true -> false, !false -> true)
+      new_status = !current_config.enabled
+
+      # 3. Mise à jour de la base de données avec le cast direct en Postgres (::uuid)
+      Repo.query!(
+        "UPDATE organization_event_definitions SET enabled = $1 WHERE id = $2::uuid",
+        [new_status, config_id]
+      )
+
+      # 4. Recharger globalement l'état des assigns et recalculer la map @stats
+      socket = refresh_dashboard_data(socket)
+
+      # 5. Mettre à jour l'état interne du modal pour synchroniser les switches
+      {:noreply, update_modal_configs(socket)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # --- SUIVI DES MESSAGES PHENIX PUBSUB ---
 
   @impl true
   def handle_info({:global_event_toggled, _id, _active}, socket) do
@@ -37,6 +87,30 @@ defmodule EventDefinitionWeb.DashboardLive do
   def handle_info({:org_created, _name}, socket), do: {:noreply, assign_dashboard(socket)}
   @impl true
   def handle_info(_msg, socket), do: {:noreply, socket}
+
+  # --- FONCTIONS PRIVÉES ET CHARGEMENT DES DONNÉES ---
+
+  defp update_modal_configs(socket) do
+    org_id = socket.assigns.selected_org.id
+    updated_configs = Enum.filter(socket.assigns.org_event_defs, &(&1.organization_id == org_id))
+    assign(socket, selected_configs: updated_configs)
+  end
+
+  defp refresh_dashboard_data(socket) do
+    # 1. Recharger les définitions fraîches depuis la base de données
+    updated_org_event_defs = load_org_event_defs()
+
+    # 2. Recalculer le compteur des configurations activées globalement pour @stats.enabled_configs
+    enabled_configs_count = Enum.count(updated_org_event_defs, & &1.enabled)
+
+    # 3. Mettre à jour la map @stats existante sans écraser les autres compteurs du haut
+    updated_stats = Map.put(socket.assigns.stats, :enabled_configs, enabled_configs_count)
+
+    # 4. Assigner les nouvelles valeurs au socket LiveView
+    socket
+    |> assign(org_event_defs: updated_org_event_defs)
+    |> assign(stats: updated_stats)
+  end
 
   defp assign_dashboard(socket) do
     events = load_events()
@@ -128,10 +202,11 @@ defmodule EventDefinitionWeb.DashboardLive do
         id: al.id,
         user: al.user,
         action: al.action,
-        details: al.details,
-        inserted_at: al.timestamp
+        # Colonne 'event' mappée vers la clé :details
+        details: al.event,
+        inserted_at: al.inserted_at
       },
-      order_by: [desc: al.timestamp],
+      order_by: [desc: al.inserted_at],
       limit: 15
     )
     |> Repo.all()

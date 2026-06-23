@@ -445,9 +445,31 @@ defmodule EventDefinitionWeb.CoreComponents do
   attr :name, :string, required: true
   attr :class, :any, default: "size-4"
 
-  def icon(%{name: "hero-" <> _} = assigns) do
+  @heroicons_path Path.expand("../../../deps/heroicons/optimized", __DIR__)
+
+  @icons_map (with variants <- [
+                     {"", "24/outline"},
+                     {"-solid", "24/solid"},
+                     {"-mini", "20/solid"},
+                     {"-micro", "16/solid"}
+                   ] do
+                for {suffix, dir} <- variants,
+                    path = Path.join(@heroicons_path, dir),
+                    {:ok, files} <- [File.ls(path)],
+                    file <- files,
+                    name = Path.rootname(file) <> suffix,
+                    svg_path = Path.join(path, file),
+                    do: {name, File.read!(svg_path)}
+              end)
+             |> Map.new()
+
+  def icon(%{name: "hero-" <> name} = assigns) do
+    assigns = assign(assigns, :svg_content, Map.get(@icons_map, name, ""))
+
     ~H"""
-    <span class={[@name, @class]} />
+    <span class={@class}>
+      {Phoenix.HTML.raw(@svg_content)}
+    </span>
     """
   end
 
