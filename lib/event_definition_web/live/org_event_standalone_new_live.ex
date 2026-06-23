@@ -101,11 +101,7 @@ defmodule EventDefinitionWeb.OrgEventStandaloneNewLive do
     rule = build_rule(trigger, params)
 
     author_id_bin =
-      if uid = socket.assigns.current_user_id do
-        uuid_bin!(uid)
-      else
-        org_id_bin
-      end
+      if uid = socket.assigns.current_user_id, do: uuid_bin!(uid), else: org_id_bin
 
     case validate_occurrence_rule(rule) do
       :ok ->
@@ -138,7 +134,7 @@ defmodule EventDefinitionWeb.OrgEventStandaloneNewLive do
 
             {:noreply,
              socket
-             |> put_flash(:info, "Événement « #{params["name"]} » créé avec succès")
+             |> put_flash(:info, "Événement personnalisé cré avec succès")
              |> push_navigate(to: ~p"/org-events")}
 
           {:error, error} ->
@@ -202,38 +198,76 @@ defmodule EventDefinitionWeb.OrgEventStandaloneNewLive do
     end
   end
 
-  def param_label("threshold_kmh"), do: "Seuil (km/h)"
-  def param_label("min_duration_seconds"), do: "Durée minimum (s)"
-  def param_label("duration_minutes"), do: "Durée (min)"
-  def param_label("feature_collection_id"), do: "ID de la collection géographique"
-  def param_label("report_interval_minutes"), do: "Intervalle de rapport (min)"
-  def param_label("drop_percent"), do: "Seuil de baisse (%)"
-  def param_label("window_minutes"), do: "Fenêtre de détection (min)"
-  def param_label("min_distance_meters"), do: "Distance minimum (m)"
-  def param_label(_), do: "Valeur"
+  def param_info(param) do
+    case param do
+      "threshold_kmh" ->
+        %{
+          label: "Seuil (km/h)",
+          type: "number",
+          placeholder: "80",
+          hint: "Vitesse déclenchant l'événement"
+        }
 
-  def param_type("feature_collection_id"), do: "text"
-  def param_type(_), do: "number"
+      "min_duration_seconds" ->
+        %{
+          label: "Durée minimum (s)",
+          type: "number",
+          placeholder: "5",
+          hint: "Temps minimum de dépassement"
+        }
 
-  def param_placeholder("threshold_kmh"), do: "80"
-  def param_placeholder("min_duration_seconds"), do: "5"
-  def param_placeholder("duration_minutes"), do: "30"
-  def param_placeholder("feature_collection_id"), do: "uuid de la zone/POI"
-  def param_placeholder("report_interval_minutes"), do: "15"
-  def param_placeholder("drop_percent"), do: "20"
-  def param_placeholder("window_minutes"), do: "5"
-  def param_placeholder("min_distance_meters"), do: "500"
-  def param_placeholder(_), do: ""
+      "duration_minutes" ->
+        %{
+          label: "Durée (min)",
+          type: "number",
+          placeholder: "30",
+          hint: "Durée d'inactivité avant alerte"
+        }
 
-  def param_hint("threshold_kmh"), do: "Vitesse déclenchant l'événement"
-  def param_hint("min_duration_seconds"), do: "Temps minimum de dépassement"
-  def param_hint("duration_minutes"), do: "Durée d'inactivité avant alerte"
-  def param_hint("feature_collection_id"), do: "Référence vers une zone ou un point d'intérêt"
-  def param_hint("report_interval_minutes"), do: "Fréquence de génération des rapports"
-  def param_hint("drop_percent"), do: "Pourcentage de chute de carburant"
-  def param_hint("window_minutes"), do: "Période d'observation de la baisse"
-  def param_hint("min_distance_meters"), do: "Distance parcourue minimum pour déclencher MOV"
-  def param_hint(_), do: ""
+      "feature_collection_id" ->
+        %{
+          label: "ID de la collection géo",
+          type: "text",
+          placeholder: "UUID de la zone/POI",
+          hint: "Référence vers une zone ou un point d'intérêt"
+        }
+
+      "report_interval_minutes" ->
+        %{
+          label: "Intervalle de rapport (min)",
+          type: "number",
+          placeholder: "15",
+          hint: "Fréquence de génération des rapports"
+        }
+
+      "drop_percent" ->
+        %{
+          label: "Seuil de baisse (%)",
+          type: "number",
+          placeholder: "20",
+          hint: "Pourcentage de chute de carburant"
+        }
+
+      "window_minutes" ->
+        %{
+          label: "Fenêtre de détection (min)",
+          type: "number",
+          placeholder: "5",
+          hint: "Période d'observation de la baisse"
+        }
+
+      "min_distance_meters" ->
+        %{
+          label: "Distance minimum (m)",
+          type: "number",
+          placeholder: "500",
+          hint: "Distance parcourue minimum pour le déclenchement"
+        }
+
+      _ ->
+        %{label: "Valeur", type: "text", placeholder: "", hint: ""}
+    end
+  end
 
   defp load_feature_collections do
     Repo.query!(
@@ -274,10 +308,10 @@ defmodule EventDefinitionWeb.OrgEventStandaloneNewLive do
   defp validate_occurrence_rule(rule) do
     cond do
       rule == %{} ->
-        {:error, "La règle d'occurrence ne peut pas être vide pour un événement standalone"}
+        {:error, "La règle d'occurrence ne peut pas être vide pour un événement autonome"}
 
-      not (Map.has_key?(rule, "trigger") or Map.has_key?(rule, :trigger)) ->
-        {:error, "La règle d'occurrence doit contenir une clé 'trigger'"}
+      not Map.has_key?(rule, "trigger") ->
+        {:error, "La règle doit contenir un déclencheur valide"}
 
       Map.get(rule, "trigger") in [nil, ""] ->
         {:error, "Veuillez sélectionner un déclencheur"}
