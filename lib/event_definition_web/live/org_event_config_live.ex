@@ -81,10 +81,7 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
   @impl true
   def handle_event("validate", %{"org_event_definition" => params}, socket) do
     selected_org = Map.get(params, "organization_id")
-
-    form =
-      params
-      |> then(fn p -> to_form(p, as: :org_event_definition) end)
+    form = to_form(params, as: :org_event_definition)
 
     {:noreply,
      socket
@@ -99,9 +96,7 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
     db_params =
       params
       |> Map.update("occurrence_rule", %{}, &parse_json_map/1)
-      |> Map.update("category", "", fn v ->
-        if v == "", do: nil, else: String.to_atom(v)
-      end)
+      |> Map.update("category", "", fn v -> if v == "", do: nil, else: String.to_atom(v) end)
       |> Map.update("class", "", fn v -> if v == "", do: nil, else: String.to_atom(v) end)
       |> Map.update("alert_mode", "none", &String.to_atom/1)
       |> Map.update("level", nil, fn v -> if v == "", do: nil, else: String.to_integer(v) end)
@@ -109,15 +104,11 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
 
     case update_org_event_def(binary_id, db_params) do
       {:ok, _} ->
-        Phoenix.PubSub.broadcast(
-          EventDefinition.PubSub,
-          "global_events",
-          {:global_reset, :all}
-        )
+        Phoenix.PubSub.broadcast(EventDefinition.PubSub, "global_events", {:global_reset, :all})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Configuration mise à jour")
+         |> put_flash(:info, "Configuration mise à jour avec succès")
          |> push_navigate(to: ~p"/org-events")}
 
       {:error, error} ->
@@ -135,19 +126,14 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
   def handle_event("delete", _params, socket) do
     binary_id = Ecto.UUID.cast!(socket.assigns.oed_id)
 
-    {_count, _} =
-      from(oed in "organization_event_definitions", where: oed.id == type(^binary_id, Ecto.UUID))
-      |> Repo.delete_all()
+    from(oed in "organization_event_definitions", where: oed.id == type(^binary_id, Ecto.UUID))
+    |> Repo.delete_all()
 
-    Phoenix.PubSub.broadcast(
-      EventDefinition.PubSub,
-      "global_events",
-      {:global_reset, :all}
-    )
+    Phoenix.PubSub.broadcast(EventDefinition.PubSub, "global_events", {:global_reset, :all})
 
     {:noreply,
      socket
-     |> put_flash(:info, "Configuration supprimée")
+     |> put_flash(:info, "Configuration supprimée avec succès")
      |> push_navigate(to: ~p"/org-events")}
   end
 
@@ -201,9 +187,7 @@ defmodule EventDefinitionWeb.OrgEventConfigLive do
       |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
       |> Map.new()
 
-    from(oed in "organization_event_definitions",
-      where: oed.id == type(^binary_id, Ecto.UUID)
-    )
+    from(oed in "organization_event_definitions", where: oed.id == type(^binary_id, Ecto.UUID))
     |> Repo.update_all(set: update_fields)
 
     {:ok, binary_id}
