@@ -1,8 +1,8 @@
-defmodule EventDefinition.Repo.Migrations.FixAuditLogTimestamp do
+defmodule EventDefinition.Repo.Migrations.FixAlertLogsStructure do
   use Ecto.Migration
 
-  alter table(:audit_logs) do
-    add :organization_id, :uuid
-    add :details, :map
+  def change do
+    # This migration is superseded by 20260623040644_add_organization_id_and_details_to_audit_logs
+    # Keep as no-op to avoid conflicts
   end
 end
