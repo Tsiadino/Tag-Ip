@@ -9,7 +9,11 @@ defmodule EventDefinition.Accounts.Organization do
   end
 
   actions do
-    defaults([:read, :create, :update])
+    defaults([:read, :create])
+
+    update :update do
+      accept([:name, :slug, :config])
+    end
   end
 
   attributes do
