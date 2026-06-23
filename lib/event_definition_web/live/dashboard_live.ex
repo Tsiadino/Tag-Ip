@@ -42,27 +42,23 @@ defmodule EventDefinitionWeb.DashboardLive do
 
   @impl true
   def handle_event("toggle_config_activation", %{"config_id" => config_id}, socket) do
-    # 1. Trouver la configuration actuelle dans notre état local (socket)
-    current_config = Enum.find(socket.assigns.org_event_defs, &(&1.id == config_id))
+    # 1. Trouver la configuration via Ash (Ash gère le cast UUID automatiquement)
+    config = EventDefinition.Events.OrganizationEventDefinition |> Ash.get!(config_id)
 
-    if current_config do
-      # 2. Inverser l'état actuel (!true -> false, !false -> true)
-      new_status = !current_config.enabled
+    # 2. Utiliser l'action d'update définie dans votre ressource Ash
+    # On inverse la valeur de 'enabled'
+    config
+    |> Ash.Changeset.for_update(:update, %{enabled: !config.enabled})
+    |> Ash.update!()
 
-      # 3. Mise à jour de la base de données avec le cast direct en Postgres (::uuid)
-      Repo.query!(
-        "UPDATE organization_event_definitions SET enabled = $1 WHERE id = $2::uuid",
-        [new_status, config_id]
-      )
-
-      # 4. Recharger globalement l'état des assigns et recalculer la map @stats
-      socket = refresh_dashboard_data(socket)
-
-      # 5. Mettre à jour l'état interne du modal pour synchroniser les switches
-      {:noreply, update_modal_configs(socket)}
-    else
+    # 3. Recharger globalement l'état et mettre à jour le modal
+    socket = refresh_dashboard_data(socket)
+    {:noreply, update_modal_configs(socket)}
+  rescue
+    e ->
+      # Optionnel : gérer les erreurs si l'ID est invalide
+      IO.inspect(e, label: "Erreur lors de la mise à jour")
       {:noreply, socket}
-    end
   end
 
   # --- SUIVI DES MESSAGES PHENIX PUBSUB ---

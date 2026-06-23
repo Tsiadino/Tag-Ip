@@ -2,9 +2,15 @@ defmodule EventDefinition.Repo.Migrations.AddOrganizationIdAndDetailsToAuditLogs
   use Ecto.Migration
 
   def change do
-    alter table(:audit_logs) do
-      add :organization_id, references(:organizations, type: :uuid, on_delete: :nothing)
-      add :details, :map
-    end
+    execute """
+              ALTER TABLE audit_logs
+              ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES organizations(id) ON DELETE NO ACTION,
+              ADD COLUMN IF NOT EXISTS details JSONB
+            """,
+            """
+              ALTER TABLE audit_logs
+              DROP COLUMN IF EXISTS organization_id,
+              DROP COLUMN IF EXISTS details
+            """
   end
 end

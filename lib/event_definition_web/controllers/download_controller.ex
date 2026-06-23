@@ -8,7 +8,10 @@ defmodule EventDefinitionWeb.DownloadController do
       {:ok, content} ->
         conn
         |> put_resp_content_type("text/csv")
-        |> put_resp_header("content-disposition", ~s[attachment; filename="event_descriptions.csv"])
+        |> put_resp_header(
+          "content-disposition",
+          ~s[attachment; filename="event_descriptions.csv"]
+        )
         |> send_resp(200, content)
 
       {:error, _} ->
