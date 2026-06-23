@@ -5,26 +5,166 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
   import Ecto.Query, only: [from: 2]
 
   @auto_presets %{
-    "Départ" => %{"monitor_type" => "MovementMonitor", "level" => "1", "description" => "Détecte le début d'un mouvement", "category" => "physical", "class" => "movement", "level_group" => "movement"},
-    "Déplacement" => %{"monitor_type" => "MovementMonitor", "level" => "1", "description" => "État de déplacement continu", "category" => "derived", "class" => "movement", "level_group" => "movement"},
-    "Déplacement parking" => %{"monitor_type" => "MovementMonitor", "level" => "1", "description" => "Mouvement spécifique au parking", "category" => "derived", "class" => "movement", "level_group" => "movement"},
-    "Arrivée" => %{"monitor_type" => "MovementMonitor", "level" => "1", "description" => "Détecte la fin d'un mouvement", "category" => "physical", "class" => "movement", "level_group" => "movement"},
-    "Arrêt" => %{"monitor_type" => "MovementMonitor", "level" => "1", "description" => "Détecte l'arrêt/stationnement", "category" => "physical", "class" => "movement", "level_group" => "movement"},
-    "Batterie faible" => %{"monitor_type" => "PowerMonitor", "level" => "1", "description" => "Détecte un niveau de batterie bas", "category" => "system", "class" => "power", "level_group" => "power"},
-    "Perte signal GPS" => %{"monitor_type" => "ConnectivityMonitor", "level" => "1", "description" => "Perte de signal GPS", "category" => "system", "class" => "connectivity", "level_group" => "connectivity"},
-    "Signal GPS retrouvé" => %{"monitor_type" => "ConnectivityMonitor", "level" => "1", "description" => "Rétablissement du signal GPS", "category" => "system", "class" => "connectivity", "level_group" => "connectivity"},
-    "Connexion perdue" => %{"monitor_type" => "ConnectivityMonitor", "level" => "1", "description" => "Perte de connexion réseau", "category" => "system", "class" => "connectivity", "level_group" => "connectivity"},
-    "Excès de vitesse" => %{"monitor_type" => "SpeedMonitor", "level" => "2", "description" => "speed_exceeds", "category" => "alarm", "class" => "speed", "level_group" => "speed"},
-    "Inactivité prolongée" => %{"monitor_type" => "IdleMonitor", "level" => "2", "description" => "no_movement", "category" => "alarm", "class" => "alarm", "level_group" => "alarm"},
-    "Entrée de zone" => %{"monitor_type" => "GeofenceMonitor", "level" => "2", "description" => "geofence_enter", "category" => "physical", "class" => "geofence", "level_group" => "geofence"},
-    "Sortie de zone" => %{"monitor_type" => "GeofenceMonitor", "level" => "2", "description" => "geofence_exit", "category" => "physical", "class" => "geofence", "level_group" => "geofence"},
-    "Dans la zone" => %{"monitor_type" => "GeofenceMonitor", "level" => "2", "description" => "geofence_inside", "category" => "derived", "class" => "geofence", "level_group" => "geofence"},
-    "Proximité POI" => %{"monitor_type" => "PoiMonitor", "level" => "2", "description" => "poi_near", "category" => "geofence", "class" => "geofence", "level_group" => "poi"},
-    "Approche POI" => %{"monitor_type" => "PoiMonitor", "level" => "2", "description" => "poi_approaching", "category" => "geofence", "class" => "geofence", "level_group" => "poi"},
-    "Départ POI" => %{"monitor_type" => "PoiMonitor", "level" => "2", "description" => "poi_leaving", "category" => "geofence", "class" => "geofence", "level_group" => "poi"},
-    "Chute de carburant" => %{"monitor_type" => "FuelMonitor", "level" => "2", "description" => "fuel_drop", "category" => "fuel", "class" => "fuel", "level_group" => "fuel"},
-    "Freinage brusque" => %{"monitor_type" => "DrivingMonitor", "level" => "2", "description" => "deceleration_exceeds", "category" => "alarm", "class" => "driving", "level_group" => "driving"},
-    "Impact/choc" => %{"monitor_type" => "AccelerometerMonitor", "level" => "2", "description" => "acceleration_shock", "category" => "alarm", "class" => "accelerometer", "level_group" => "driving"}
+    "Départ" => %{
+      "monitor_type" => "MovementMonitor",
+      "level" => "1",
+      "description" => "Détecte le début d'un mouvement",
+      "category" => "physical",
+      "class" => "movement",
+      "level_group" => "movement"
+    },
+    "Déplacement" => %{
+      "monitor_type" => "MovementMonitor",
+      "level" => "1",
+      "description" => "État de déplacement continu",
+      "category" => "derived",
+      "class" => "movement",
+      "level_group" => "movement"
+    },
+    "Déplacement parking" => %{
+      "monitor_type" => "MovementMonitor",
+      "level" => "1",
+      "description" => "Mouvement spécifique au parking",
+      "category" => "derived",
+      "class" => "movement",
+      "level_group" => "movement"
+    },
+    "Arrivée" => %{
+      "monitor_type" => "MovementMonitor",
+      "level" => "1",
+      "description" => "Détecte la fin d'un mouvement",
+      "category" => "physical",
+      "class" => "movement",
+      "level_group" => "movement"
+    },
+    "Arrêt" => %{
+      "monitor_type" => "MovementMonitor",
+      "level" => "1",
+      "description" => "Détecte l'arrêt/stationnement",
+      "category" => "physical",
+      "class" => "movement",
+      "level_group" => "movement"
+    },
+    "Batterie faible" => %{
+      "monitor_type" => "PowerMonitor",
+      "level" => "1",
+      "description" => "Détecte un niveau de batterie bas",
+      "category" => "system",
+      "class" => "power",
+      "level_group" => "power"
+    },
+    "Perte signal GPS" => %{
+      "monitor_type" => "ConnectivityMonitor",
+      "level" => "1",
+      "description" => "Perte de signal GPS",
+      "category" => "system",
+      "class" => "connectivity",
+      "level_group" => "connectivity"
+    },
+    "Signal GPS retrouvé" => %{
+      "monitor_type" => "ConnectivityMonitor",
+      "level" => "1",
+      "description" => "Rétablissement du signal GPS",
+      "category" => "system",
+      "class" => "connectivity",
+      "level_group" => "connectivity"
+    },
+    "Connexion perdue" => %{
+      "monitor_type" => "ConnectivityMonitor",
+      "level" => "1",
+      "description" => "Perte de connexion réseau",
+      "category" => "system",
+      "class" => "connectivity",
+      "level_group" => "connectivity"
+    },
+    "Excès de vitesse" => %{
+      "monitor_type" => "SpeedMonitor",
+      "level" => "2",
+      "description" => "speed_exceeds",
+      "category" => "alarm",
+      "class" => "speed",
+      "level_group" => "speed"
+    },
+    "Inactivité prolongée" => %{
+      "monitor_type" => "IdleMonitor",
+      "level" => "2",
+      "description" => "no_movement",
+      "category" => "alarm",
+      "class" => "alarm",
+      "level_group" => "alarm"
+    },
+    "Entrée de zone" => %{
+      "monitor_type" => "GeofenceMonitor",
+      "level" => "2",
+      "description" => "geofence_enter",
+      "category" => "physical",
+      "class" => "geofence",
+      "level_group" => "geofence"
+    },
+    "Sortie de zone" => %{
+      "monitor_type" => "GeofenceMonitor",
+      "level" => "2",
+      "description" => "geofence_exit",
+      "category" => "physical",
+      "class" => "geofence",
+      "level_group" => "geofence"
+    },
+    "Dans la zone" => %{
+      "monitor_type" => "GeofenceMonitor",
+      "level" => "2",
+      "description" => "geofence_inside",
+      "category" => "derived",
+      "class" => "geofence",
+      "level_group" => "geofence"
+    },
+    "Proximité POI" => %{
+      "monitor_type" => "PoiMonitor",
+      "level" => "2",
+      "description" => "poi_near",
+      "category" => "geofence",
+      "class" => "geofence",
+      "level_group" => "poi"
+    },
+    "Approche POI" => %{
+      "monitor_type" => "PoiMonitor",
+      "level" => "2",
+      "description" => "poi_approaching",
+      "category" => "geofence",
+      "class" => "geofence",
+      "level_group" => "poi"
+    },
+    "Départ POI" => %{
+      "monitor_type" => "PoiMonitor",
+      "level" => "2",
+      "description" => "poi_leaving",
+      "category" => "geofence",
+      "class" => "geofence",
+      "level_group" => "poi"
+    },
+    "Chute de carburant" => %{
+      "monitor_type" => "FuelMonitor",
+      "level" => "2",
+      "description" => "fuel_drop",
+      "category" => "fuel",
+      "class" => "fuel",
+      "level_group" => "fuel"
+    },
+    "Freinage brusque" => %{
+      "monitor_type" => "DrivingMonitor",
+      "level" => "2",
+      "description" => "deceleration_exceeds",
+      "category" => "alarm",
+      "class" => "driving",
+      "level_group" => "driving"
+    },
+    "Impact/choc" => %{
+      "monitor_type" => "AccelerometerMonitor",
+      "level" => "2",
+      "description" => "acceleration_shock",
+      "category" => "alarm",
+      "class" => "accelerometer",
+      "level_group" => "driving"
+    }
   }
 
   @preset_events %{}
@@ -48,8 +188,32 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
        }
      )
      |> assign(categories: ["physical", "derived", "system", "alarm", "fuel"])
-     |> assign(classes: ["movement", "power", "connectivity", "speed", "alarm", "geofence", "fuel", "driving", "accelerometer"])
-     |> assign(level_groups: ["movement", "power", "connectivity", "speed", "alarm", "geofence", "poi", "fuel", "driving"])
+     |> assign(
+       classes: [
+         "movement",
+         "power",
+         "connectivity",
+         "speed",
+         "alarm",
+         "geofence",
+         "fuel",
+         "driving",
+         "accelerometer"
+       ]
+     )
+     |> assign(
+       level_groups: [
+         "movement",
+         "power",
+         "connectivity",
+         "speed",
+         "alarm",
+         "geofence",
+         "poi",
+         "fuel",
+         "driving"
+       ]
+     )
      |> assign(modal: nil, editing_event: nil, events: load_events())}
   end
 
@@ -66,9 +230,10 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
     updated_fields =
       case Map.get(@auto_presets, name) do
         %{} = preset ->
-          params 
+          params
           |> Map.merge(preset)
           |> Map.update("level", "1", &to_string/1)
+
         nil ->
           params
       end
@@ -85,7 +250,21 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
 
   @impl true
   def handle_event("open-new-modal", _, socket) do
-    {:noreply, assign(socket, modal: :new, editing_event: nil, form: %{"code" => "", "name" => "", "monitor_type" => "", "level" => "", "description" => "", "category" => "", "class" => "", "level_group" => ""})}
+    {:noreply,
+     assign(socket,
+       modal: :new,
+       editing_event: nil,
+       form: %{
+         "code" => "",
+         "name" => "",
+         "monitor_type" => "",
+         "level" => "",
+         "description" => "",
+         "category" => "",
+         "class" => "",
+         "level_group" => ""
+       }
+     )}
   end
 
   @impl true
@@ -138,12 +317,18 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
       from(e in "event_definitions", where: e.id == ^binary_id)
       |> Repo.update_all(
         set: [
-          code: form["code"],           # OBLIGATOIRE
-          name: form["name"],           # OBLIGATOIRE
-          category: form["category"],   # OBLIGATOIRE
-          class: form["class"],         # OBLIGATOIRE
-          level: level_int,             # OBLIGATOIRE
-          monitor_type: form["monitor_type"], # OBLIGATOIRE
+          # OBLIGATOIRE
+          code: form["code"],
+          # OBLIGATOIRE
+          name: form["name"],
+          # OBLIGATOIRE
+          category: form["category"],
+          # OBLIGATOIRE
+          class: form["class"],
+          # OBLIGATOIRE
+          level: level_int,
+          # OBLIGATOIRE
+          monitor_type: form["monitor_type"],
           definition: form["description"],
           level_group: form["level_group"]
         ]
@@ -175,7 +360,7 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
       level: String.to_integer(params["level"] || "1"),
       definition: params["description"],
       # Utilisation de la fonction de sécurité ici :
-      category: safe_to_atom(params["category"]), 
+      category: safe_to_atom(params["category"]),
       class: safe_to_atom(params["class"]),
       level_group: params["level_group"]
     }
@@ -183,28 +368,13 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
     case Ash.create(EventDefinition.Events.EventDefinition, attrs) do
       {:ok, _event} ->
         {:noreply,
-        socket
-        |> put_flash(:info, "Événement créé avec succès.")
-        |> assign(modal: nil, events: load_events())}
+         socket
+         |> put_flash(:info, "Événement créé avec succès.")
+         |> assign(modal: nil, events: load_events())}
 
       {:error, changeset} ->
-        {:noreply, put_flash(socket, :error, "Erreur lors de la création : #{inspect(changeset.errors)}")}
-    end
-  end
-  
-  defp safe_to_atom(value) when value in ["", nil], do: nil
-
-  defp safe_to_atom(value) when is_binary(value) do
-    # Liste combinée de toutes les valeurs possibles pour éviter le :unknown
-    allowed_values = [
-      "physical", "derived", "system", "alarm", "fuel", "information", "infraction",
-      "movement", "power", "connectivity", "speed", "geofence", "driving", "accelerometer", "unknown"
-    ]
-    
-    if value in allowed_values do
-      String.to_atom(value)
-    else
-      :unknown
+        {:noreply,
+         put_flash(socket, :error, "Erreur lors de la création : #{inspect(changeset.errors)}")}
     end
   end
 
@@ -212,23 +382,23 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
   def handle_event("toggle-active", %{"id" => id}, socket) do
     # 1. Récupère l'objet
     event = Ash.get!(EventDefinition.Events.EventDefinition, id)
-    
+
     # 2. Change l'état (l'inverse de l'actuel)
     new_status = !event.active
-    
+
     # 3. Met à jour via Ash
     case Ash.update(event, %{active: new_status}) do
       {:ok, _updated_event} ->
-        {:noreply, 
-        socket 
-        |> put_flash(:info, "État modifié.")
-        |> assign(:events, load_events())}
+        {:noreply,
+         socket
+         |> put_flash(:info, "État modifié.")
+         |> assign(:events, load_events())}
 
       {:error, _reason} ->
         {:noreply, put_flash(socket, :error, "Erreur lors de la mise à jour.")}
     end
   end
-  
+
   @impl true
   def handle_event("delete-event", %{"id" => id}, socket) do
     event = Ash.get!(EventDefinition.Events.EventDefinition, id)
@@ -236,40 +406,69 @@ defmodule EventDefinitionWeb.GlobalEventsLive do
     case Ash.destroy(event) do
       :ok ->
         {:noreply,
-        socket
-        |> put_flash(:info, "Événement supprimé.")
-        |> assign(:events, load_events())}
+         socket
+         |> put_flash(:info, "Événement supprimé.")
+         |> assign(:events, load_events())}
 
       {:error, _error} ->
         {:noreply, put_flash(socket, :error, "Impossible de supprimer.")}
     end
   end
-  
+
   @impl true
-  def handle_info({:event_created, _id}, socket), do: {:noreply, assign(socket, events: load_events())}
+  def handle_info({:event_created, _id}, socket),
+    do: {:noreply, assign(socket, events: load_events())}
+
   @impl true
-  def handle_info({:event_updated, _id}, socket), do: {:noreply, assign(socket, events: load_events())}
+  def handle_info({:event_updated, _id}, socket),
+    do: {:noreply, assign(socket, events: load_events())}
+
   @impl true
-  def handle_info({:event_deleted, _id}, socket), do: {:noreply, assign(socket, events: load_events())}
+  def handle_info({:event_deleted, _id}, socket),
+    do: {:noreply, assign(socket, events: load_events())}
+
   @impl true
-  def handle_info({:global_event_toggled, _id, _active}, socket), do: {:noreply, assign(socket, events: load_events())}
+  def handle_info({:global_event_toggled, _id, _active}, socket),
+    do: {:noreply, assign(socket, events: load_events())}
+
   @impl true
-  def handle_info({:global_reset, _active}, socket), do: {:noreply, assign(socket, events: load_events())}
+  def handle_info({:global_reset, _active}, socket),
+    do: {:noreply, assign(socket, events: load_events())}
+
   @impl true
   def handle_info(_msg, socket), do: {:noreply, socket}
 
-  @impl true
   defp load_events do
     EventDefinition.Events.EventDefinition
     |> Ash.read!()
     |> Enum.sort_by(& &1.code)
   end
 
-  defp normalize_uuid(id) when is_binary(id) do
-    case Ecto.UUID.load(id) do
-      {:ok, uuid} -> uuid
-      :error -> id
+  defp safe_to_atom(value) when value in ["", nil], do: nil
+
+  defp safe_to_atom(value) when is_binary(value) do
+    allowed_values = [
+      "physical",
+      "derived",
+      "system",
+      "alarm",
+      "fuel",
+      "information",
+      "infraction",
+      "movement",
+      "power",
+      "connectivity",
+      "speed",
+      "geofence",
+      "driving",
+      "accelerometer",
+      "unknown"
+    ]
+
+    if value in allowed_values do
+      String.to_atom(value)
+    else
+      :unknown
     end
   end
-  defp normalize_uuid(id), do: to_string(id)
 end
