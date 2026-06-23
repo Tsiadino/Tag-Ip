@@ -18,32 +18,31 @@ defmodule EventDefinitionWeb.InitLive do
 
   @impl true
   def handle_event("select-org", %{"org_id" => org_id}, socket) do
-    suggestions = build_suggestions(org_id)
+    if org_id != "" do
+      suggestions = build_suggestions(org_id, socket.assigns.events)
+      selected_ids = suggestions |> Enum.filter(& &1.recommended) |> Enum.map(& &1.id)
 
-    {:noreply,
-     socket
-     |> assign(:selected_org_id, org_id)
-     |> assign(:suggestions, suggestions)
-     |> assign(:selected_ids, suggestions |> Enum.filter(& &1.recommended) |> Enum.map(& &1.id))}
+      {:noreply,
+       socket
+       |> assign(:selected_org_id, org_id)
+       |> assign(:suggestions, suggestions)
+       |> assign(:selected_ids, selected_ids)}
+    else
+      {:noreply, socket |> assign(selected_org_id: nil, suggestions: [], selected_ids: [])}
+    end
   end
 
   @impl true
   def handle_event("toggle-suggestion", %{"id" => id}, socket) do
     current = socket.assigns.selected_ids
-
-    updated =
-      if id in current do
-        List.delete(current, id)
-      else
-        [id | current]
-      end
+    updated = if id in current, do: List.delete(current, id), else: [id | current]
 
     {:noreply, assign(socket, :selected_ids, updated)}
   end
 
   @impl true
   def handle_event("select-all", _params, socket) do
-    ids = Enum.map(socket.assigns.suggestions, & &1.id)
+    ids = socket.assigns.suggestions |> Enum.reject(& &1.already_configured) |> Enum.map(& &1.id)
     {:noreply, assign(socket, :selected_ids, ids)}
   end
 
@@ -74,11 +73,7 @@ defmodule EventDefinitionWeb.InitLive do
 
       count = initialize_org(org_id, selected_ids)
 
-      Phoenix.PubSub.broadcast(
-        EventDefinition.PubSub,
-        "global_events",
-        {:org_created, org_id}
-      )
+      Phoenix.PubSub.broadcast(EventDefinition.PubSub, "global_events", {:org_created, org_id})
 
       {:noreply,
        socket
@@ -98,24 +93,13 @@ defmodule EventDefinitionWeb.InitLive do
     slug = "org_#{new_id}"
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
-    Repo.insert_all("organizations", [
-      [
-        name: name,
-        slug: slug,
-        inserted_at: now,
-        updated_at: now
-      ]
-    ])
+    Repo.insert_all("organizations", [[name: name, slug: slug, inserted_at: now, updated_at: now]])
 
-    Phoenix.PubSub.broadcast(
-      EventDefinition.PubSub,
-      "global_events",
-      {:org_created, name}
-    )
+    Phoenix.PubSub.broadcast(EventDefinition.PubSub, "global_events", {:org_created, name})
 
     {:noreply,
      socket
-     |> put_flash(:info, "🏢 Organisation « #{name} » (#{slug}) créée avec succès")
+     |> put_flash(:info, "🏢 Organisation « #{name} » créée avec succès")
      |> refresh_all_data()}
   end
 
@@ -124,11 +108,7 @@ defmodule EventDefinitionWeb.InitLive do
     count = Repo.aggregate(from(e in "event_definitions"), :count, :id)
     from(e in "event_definitions") |> Repo.update_all(set: [active: true])
 
-    Phoenix.PubSub.broadcast(
-      EventDefinition.PubSub,
-      "global_events",
-      {:global_reset, true}
-    )
+    Phoenix.PubSub.broadcast(EventDefinition.PubSub, "global_events", {:global_reset, true})
 
     {:noreply,
      socket
@@ -141,18 +121,11 @@ defmodule EventDefinitionWeb.InitLive do
     count = Repo.aggregate(from(e in "event_definitions"), :count, :id)
     from(e in "event_definitions") |> Repo.update_all(set: [active: false])
 
-    Phoenix.PubSub.broadcast(
-      EventDefinition.PubSub,
-      "global_events",
-      {:global_reset, false}
-    )
+    Phoenix.PubSub.broadcast(EventDefinition.PubSub, "global_events", {:global_reset, false})
 
     {:noreply,
      socket
-     |> put_flash(
-       :info,
-       "⏸️ Action globale — #{count} événement(s) désactivé(s) dans le catalogue"
-     )
+     |> put_flash(:info, "⏸️ Action globale — #{count} événement(s) désactivé(s)")
      |> refresh_all_data()}
   end
 
@@ -203,22 +176,32 @@ defmodule EventDefinitionWeb.InitLive do
       |> Repo.all()
       |> Enum.map(fn evt -> %{evt | id: normalize_uuid(evt.id)} end)
 
-    socket =
-      socket
-      |> assign(
-        total_events: total,
-        active_events: active,
-        organizations: orgs,
-        events: events,
-        selected_org_id: nil,
-        suggestions: [],
-        selected_ids: []
-      )
+    # Conserver l'organisation sélectionnée lors du rafraîchissement PubSub
+    current_org_id = socket.assigns[:selected_org_id]
 
-    socket
+    {suggestions, selected_ids} =
+      if current_org_id do
+        suggs = build_suggestions(current_org_id, events)
+        # Conserver uniquement les identifiants sélectionnés qui sont toujours valides
+        old_selected = socket.assigns[:selected_ids] || []
+        valid_ids = suggs |> Enum.map(& &1.id)
+        {suggs, Enum.filter(old_selected, &(&1 in valid_ids))}
+      else
+        {[], []}
+      end
+
+    assign(socket,
+      total_events: total,
+      active_events: active,
+      organizations: orgs,
+      events: events,
+      selected_org_id: current_org_id,
+      suggestions: suggestions,
+      selected_ids: selected_ids
+    )
   end
 
-  defp build_suggestions(org_id) do
+  defp build_suggestions(org_id, events) do
     binary_org_id = Ecto.UUID.cast!(org_id)
 
     existing_codes =
@@ -227,26 +210,11 @@ defmodule EventDefinitionWeb.InitLive do
         select: oed.code
       )
       |> Repo.all()
-
-    events =
-      from(e in "event_definitions",
-        select: %{
-          id: e.id,
-          code: e.code,
-          name: e.name,
-          category: e.category,
-          class: e.class,
-          level: e.level,
-          level_group: e.level_group,
-          monitor_type: e.monitor_type,
-          active: e.active
-        },
-        order_by: [asc: e.code]
-      )
-      |> Repo.all()
-      |> Enum.map(fn evt -> %{evt | id: normalize_uuid(evt.id)} end)
+      |> MapSet.new()
 
     Enum.map(events, fn evt ->
+      already_configured = MapSet.member?(existing_codes, evt.code)
+
       %{
         id: evt.id,
         code: evt.code,
@@ -256,8 +224,8 @@ defmodule EventDefinitionWeb.InitLive do
         level: evt.level,
         level_group: evt.level_group,
         monitor_type: evt.monitor_type,
-        already_configured: evt.code in existing_codes,
-        recommended: evt.level == 1 && evt.category != "system" && !(evt.code in existing_codes)
+        already_configured: already_configured,
+        recommended: evt.level == 1 && evt.category != "system" && !already_configured
       }
     end)
   end
@@ -276,8 +244,7 @@ defmodule EventDefinitionWeb.InitLive do
     events =
       from(e in "event_definitions",
         where: e.id in type(^Enum.map(selected_ids, &Ecto.UUID.cast!/1), {:array, Ecto.UUID}),
-        select: %{id: e.id, code: e.code},
-        order_by: [asc: e.code]
+        select: %{id: e.id, code: e.code}
       )
       |> Repo.all()
       |> Enum.map(fn evt -> %{evt | id: normalize_uuid(evt.id)} end)
