@@ -1,0 +1,476 @@
+<div class="space-y-6">
+  <.breadcrumbs crumbs={[{"Accueil", "/"}, {"Catalogue global", "/global-events"}]} />
+
+  <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 animate-fade-in-up">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-4">
+        <div class="size-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-sm shrink-0">
+          <.icon name="hero-book-open" class="size-6 text-white" />
+        </div>
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Catalogue Global des Événements
+          </h1>
+          <p class="text-sm text-slate-500 mt-0.5">
+            Définitions système — <strong class="text-slate-800">{length(@events)}</strong>
+            événements
+          </p>
+        </div>
+      </div>
+      <button
+        phx-click="open-new-modal"
+        class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 shrink-0"
+      >
+        <.icon name="hero-plus" class="size-4" /> Nouvel événement global
+      </button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 animate-fade-in-up delay-1 relative">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-200">
+            <th class="px-4 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-[1%] whitespace-nowrap">
+              Code
+            </th>
+            <th class="px-4 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Nom
+            </th>
+            <th class="px-4 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Catégorie
+            </th>
+            <th class="px-4 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Classe
+            </th>
+            <th class="px-4 py-3.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Niveau
+            </th>
+            <th class="px-4 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Monitor
+            </th>
+            <th class="px-4 py-3.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Actif
+            </th>
+            <th class="px-4 py-3.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <%= for event <- @events do %>
+            <tr class={[
+              "transition-all duration-150",
+              if(event.active,
+                do: "hover:bg-blue-50/50",
+                else: "opacity-60 hover:opacity-80 hover:bg-slate-50"
+              )
+            ]}>
+              <td class="px-4 py-3.5 w-[1%] whitespace-nowrap">
+                <span class="font-mono text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                  {event.code}
+                </span>
+              </td>
+              <td class="px-4 py-3.5">
+                <span class="font-semibold text-slate-900">{event.name}</span>
+                <p :if={event.definition} class="text-xs text-slate-400 mt-0.5">
+                  {event.definition}
+                </p>
+              </td>
+              <td class="px-4 py-3.5">
+                <span class={[
+                  "inline-flex px-2 py-0.5 text-xs font-semibold rounded",
+                  event.category == "physical" &&
+                    "bg-blue-50 text-blue-700 border border-blue-200",
+                  event.category == "system" &&
+                    "bg-violet-50 text-violet-700 border border-violet-200",
+                  event.category == "derived" &&
+                    "bg-amber-50 text-amber-700 border border-amber-200",
+                  event.category == "alarm" && "bg-red-50 text-red-700 border border-red-200",
+                  event.category == "fuel" &&
+                    "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                ]}>
+                  {event.category}
+                </span>
+              </td>
+              <td class="px-4 py-3.5 text-xs text-slate-500">{event.class || "—"}</td>
+              <td class="px-4 py-3.5 text-center">
+                <span class={[
+                  "inline-flex px-2 py-0.5 text-xs font-bold rounded",
+                  event.level == 1 && "bg-sky-50 text-sky-700 border border-sky-200",
+                  event.level == 2 && "bg-amber-50 text-amber-700 border border-amber-200"
+                ]}>
+                  Niv. {event.level}
+                </span>
+              </td>
+              <td class="px-4 py-3.5">
+                <span class="text-xs font-mono text-slate-500">{event.monitor_type}</span>
+              </td>
+              <td class="px-4 py-3.5 text-center">
+                <span class={[
+                  "inline-flex px-2 py-0.5 text-xs font-semibold rounded-full",
+                  event.active && "bg-emerald-50 text-emerald-700 border border-emerald-200",
+                  !event.active && "bg-red-50 text-red-700 border border-red-200"
+                ]}>
+                  {if event.active, do: "Activé", else: "Désactivé"}
+                </span>
+              </td>
+              <td class="px-4 py-3.5 text-right">
+                <div class="inline-flex gap-1.5">
+                  <button
+                    phx-click="open-edit-modal"
+                    phx-value-id={event.id}
+                    title="Modifier l'événement"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-slate-600 bg-white hover:bg-blue-50 hover:text-blue-600 rounded-lg border border-slate-300 hover:border-blue-400 transition-all"
+                  >
+                    <.icon name="hero-pencil" class="size-3" />
+                  </button>
+
+                  <button
+                    phx-click="toggle-active"
+                    phx-value-id={event.id}
+                    title={if(event.active, do: "Désactiver", else: "Activer")}
+                    class={[
+                      "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-lg border transition-all",
+                      event.active &&
+                        "text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100",
+                      !event.active &&
+                        "text-emerald-600 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                    ]}
+                  >
+                    <.icon name={if(event.active, do: "hero-pause", else: "hero-play")} />
+                  </button>
+
+                  <button
+                    phx-click="delete-event"
+                    phx-value-id={event.id}
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-red-600 bg-white hover:bg-red-50 rounded-lg border border-slate-300 hover:border-red-400 transition-all"
+                  >
+                    <.icon name="hero-trash" class="size-3" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+          <%= if Enum.empty?(@events) do %>
+            <tr>
+              <td colspan="8">
+                <div class="flex flex-col items-center justify-center py-16">
+                  <div class="size-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                    <.icon name="hero-inbox" class="size-8 text-slate-400" />
+                  </div>
+                  <h3 class="text-base font-bold text-slate-500">Aucun événement global</h3>
+                  <p class="text-sm text-slate-400 mt-1">
+                    Aucune définition d'événement dans le catalogue.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between pt-2 animate-fade-in-up delay-2">
+    <.link
+      navigate="/dashboard"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-blue-600 bg-white hover:bg-blue-50 rounded-lg border border-slate-300 hover:border-blue-400 transition-all duration-200"
+    >
+      <.icon name="hero-arrow-left" class="size-4" /> Dashboard
+    </.link>
+    <.link
+      navigate="/org-events"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+    >
+      Config. organisations <.icon name="hero-arrow-right" class="size-4" />
+    </.link>
+  </div>
+</div>
+
+<%= if @modal == :new do %>
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-lg mx-4 shadow-2xl">
+      <div class="flex items-center justify-between p-5 border-b border-slate-100">
+        <h3 class="text-lg font-bold text-slate-900">Nouvel événement global</h3>
+        <button
+          phx-click="close-modal"
+          class="size-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors"
+        >
+          <.icon name="hero-x-mark" class="size-5 text-slate-400" />
+        </button>
+      </div>
+
+      <form phx-change="update-form" phx-submit="save-new">
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Code Événement
+              </label>
+              <input
+                type="text"
+                name="code"
+                value={@form["code"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-mono text-slate-700 font-semibold"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Nom (ou Preset)
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={@form["name"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700 font-semibold"
+                list="new-presets-list"
+                required
+              />
+              <datalist id="new-presets-list">
+                <%= for name <- Map.keys(@auto_presets) do %>
+                  <option value={name}></option>
+                <% end %>
+              </datalist>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Monitor Type
+              </label>
+              <input
+                type="text"
+                name="monitor_type"
+                value={@form["monitor_type"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700 font-mono"
+              />
+            </div>
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Niveau</label>
+              <input
+                type="text"
+                name="level"
+                value={@form["level"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+              Description / Trigger
+            </label>
+            <textarea
+              name="description"
+              rows="2"
+              class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+            ><%= @form["description"] || "" %></textarea>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Catégorie</label>
+              <select
+                name="category"
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              >
+                <option value="">—</option>
+                <%= for cat <- @categories do %>
+                  <option value={cat} selected={@form["category"] == cat}>{cat}</option>
+                <% end %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Classe</label>
+              <select
+                name="class"
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              >
+                <option value="">—</option>
+                <%= for cls <- @classes do %>
+                  <option value={cls} selected={@form["class"] == cls}>{cls}</option>
+                <% end %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Level Group</label>
+              <select
+                name="level_group"
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              >
+                <option value="">—</option>
+                <%= for lg <- @level_groups do %>
+                  <option value={lg} selected={@form["level_group"] == lg}>{lg}</option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              phx-click="close-modal"
+              class="px-4 py-2 text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 rounded-lg border border-slate-300 transition-all"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              phx-disable-with="Création en cours..."
+              class="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all"
+            >
+              Créer
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+<% end %>
+
+<%= if @modal == :edit do %>
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-lg mx-4 shadow-2xl">
+      <div class="flex items-center justify-between p-5 border-b border-slate-100">
+        <h3 class="text-lg font-bold text-slate-900">
+          Modifier l'événement : <span class="font-mono text-blue-600">{@form["code"]}</span>
+        </h3>
+        <button
+          phx-click="close-modal"
+          class="size-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors"
+        >
+          <.icon name="hero-x-mark" class="size-5 text-slate-400" />
+        </button>
+      </div>
+
+      <form phx-change="update-form" phx-submit="save-edit">
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Code Événement
+              </label>
+              <input
+                type="text"
+                name="code"
+                value={@form["code"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-mono text-slate-700 font-semibold"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Nom de l'événement
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={@form["name"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700 font-semibold"
+                list="edit-presets-list"
+                required
+              />
+              <datalist id="edit-presets-list">
+                <%= for name <- Map.keys(@auto_presets) do %>
+                  <option value={name}></option>
+                <% end %>
+              </datalist>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Monitor Type
+              </label>
+              <input
+                type="text"
+                name="monitor_type"
+                value={@form["monitor_type"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700 font-mono"
+              />
+            </div>
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Niveau</label>
+              <input
+                type="text"
+                name="level"
+                value={@form["level"] || ""}
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+              Description / Trigger
+            </label>
+            <textarea
+              name="description"
+              rows="2"
+              class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+            ><%= @form["description"] || "" %></textarea>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Catégorie</label>
+              <select
+                name="category"
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              >
+                <%= for cat <- @categories do %>
+                  <option value={cat} selected={@form["category"] == cat}>{cat}</option>
+                <% end %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Classe</label>
+              <select
+                name="class"
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              >
+                <%= for cls <- @classes do %>
+                  <option value={cls} selected={@form["class"] == cls}>{cls}</option>
+                <% end %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Level Group</label>
+              <select
+                name="level_group"
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-slate-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm text-slate-700"
+              >
+                <option value="">—</option>
+                <%= for lg <- @level_groups do %>
+                  <option value={lg} selected={@form["level_group"] == lg}>{lg}</option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              phx-click="close-modal"
+              class="px-4 py-2 text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 rounded-lg border border-slate-300 transition-all"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+<% end %>

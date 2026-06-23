@@ -1,0 +1,586 @@
+<div class="space-y-6">
+  <.breadcrumbs crumbs={[
+    {"Accueil", "/"},
+    {"Config. organisations", "/org-events"},
+    {"Configurer", ""}
+  ]} />
+
+  <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 animate-fade-in-up">
+    <div class="flex items-center gap-4 mb-4">
+      <div class="size-12 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-sm shrink-0">
+        <.icon name="hero-cog-6-tooth" class="size-6 text-white" />
+      </div>
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+          Configurer l'événement organisationnel
+        </h1>
+        <p class="text-sm text-gray-500 mt-0.5">
+          Personnalisez les paramètres de l'événement pour cette organisation
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 animate-fade-in-up delay-1">
+    <div class="p-6">
+      <.form
+        for={@form}
+        id="org-event-config-form"
+        phx-change="validate"
+        phx-submit="save"
+        class="space-y-5"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-5">
+            <div class="col-span-1 md:col-span-2">
+              <.input
+                field={@form[:organization_id]}
+                type="select"
+                label="Organisation Cliente"
+                prompt="Sélectionner une organisation"
+                options={@org_options}
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+              />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <.input
+                field={@form[:code]}
+                type="select"
+                label="Code événement"
+                prompt="-- Sélectionner un code --"
+                options={@code_options}
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+              />
+              <.input
+                field={@form[:name]}
+                type="select"
+                label="Nom"
+                prompt="-- Sélectionner un nom --"
+                options={@name_options}
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+              />
+              <.input
+                field={@form[:level]}
+                type="number"
+                label="Niveau"
+                min="1"
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+              />
+            </div>
+
+            <.input
+              field={@form[:category]}
+              type="select"
+              label="Catégorie"
+              prompt="Sélectionner une catégorie"
+              options={[
+                {"Physique", "physical"},
+                {"Système", "system"},
+                {"Dérivé", "derived"}
+              ]}
+              class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+            />
+
+            <.input
+              field={@form[:class]}
+              type="text"
+              label="Classe"
+              list="class-list"
+              class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+            />
+            <datalist id="class-list">
+              <option :for={class <- @classes} value={class} />
+            </datalist>
+
+            <.input
+              field={@form[:level_group]}
+              type="text"
+              label="Groupe de niveau"
+              list="level-group-list"
+              class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+            />
+            <datalist id="level-group-list">
+              <option :for={lg <- @level_groups} value={lg} />
+            </datalist>
+
+            <.input
+              field={@form[:definition]}
+              type="textarea"
+              label="Définition"
+              class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+            />
+          </div>
+
+          <div class="space-y-5">
+            <div class="bg-gray-50 rounded-xl border border-gray-200 p-5">
+              <div class="flex items-center gap-2 mb-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <.icon name="hero-bell-alert" class="size-4" /> Configuration avancée
+              </div>
+
+              <.input
+                field={@form[:alert_mode]}
+                type="select"
+                label="Mode d'alerte"
+                prompt="Sélectionner un mode"
+                options={[
+                  {"Aucun", "none"},
+                  {"Alerte", "alert"},
+                  {"Rapport", "report"},
+                  {"Les deux", "both"}
+                ]}
+                class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-sm font-medium text-gray-700"
+              />
+
+              <.input
+                field={@form[:enabled]}
+                type="checkbox"
+                label="Activé"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+
+              <div class="mt-5">
+                <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">
+                  Règle d'occurrence (JSON)
+                </label>
+                <.input
+                  field={@form[:occurrence_rule]}
+                  type="textarea"
+                  placeholder='{"trigger": "on_change", "condition": "value > 100"}'
+                  class="w-full font-mono text-xs px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none text-gray-700"
+                />
+              </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl border border-blue-200 p-5">
+              <div class="flex items-center gap-2 mb-3 text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                <.icon name="hero-information-circle" class="size-4" /> Résumé
+              </div>
+              <div class="space-y-1 text-sm text-blue-700">
+                <p>
+                  <span class="font-semibold">Organisation Active :</span>
+                  <span class="bg-blue-200 px-2 py-0.5 rounded text-xs font-bold font-mono">
+                    {@org_map[@selected_org] || "Aucune organisation sélectionnée"}
+                  </span>
+                </p>
+                <p><span class="font-semibold">Code :</span> {@form[:code].value || "—"}</p>
+                <p><span class="font-semibold">Nom :</span> {@form[:name].value || "—"}</p>
+                <p>
+                  <span class="font-semibold">Catégorie :</span> {@form[:category].value || "—"}
+                </p>
+                <p><span class="font-semibold">Niveau :</span> {@form[:level].value || "—"}</p>
+                <p>
+                  <span class="font-semibold">Alerte :</span> {@form[:alert_mode].value || "none"}
+                </p>
+                <p>
+                  <span class="font-semibold">Activé :</span> {(@form[:enabled].value == "true" &&
+                                                                  "Oui") || "Non"}
+                </p>
+              </div>
+            </div>
+
+            <div :if={@editing_record} class="bg-amber-50 rounded-xl border border-amber-200 p-5">
+              <div class="flex items-center gap-2 mb-3 text-xs font-semibold text-amber-600 uppercase tracking-wider">
+                <.icon name="hero-trash" class="size-4" /> Zone de danger
+              </div>
+              <p class="text-xs text-amber-600 mb-3">
+                Supprimer cette configuration d'événement pour cette organisation. Cette action est irréversible.
+              </p>
+              <button
+                type="button"
+                phx-click="delete"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 rounded-lg transition-all duration-200"
+              >
+                <.icon name="hero-trash" class="size-4" /> Supprimer la configuration
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 text-sm shadow-sm"
+          >
+            <.icon name="hero-check" class="size-4" /> Enregistrer
+          </button>
+          <.link
+            navigate="/org-events"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200"
+          >
+            Annuler
+          </.link>
+          <button
+            type="button"
+            phx-click="open-org-activate-modal"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 ml-auto"
+          >
+            <.icon name="hero-plus" class="size-4" /> Activer un événement
+          </button>
+        </div>
+      </.form>
+    </div>
+  </div>
+
+  <div
+    :if={@org_event_defs != [] or @standalone_event_defs != []}
+    class="bg-white rounded-xl shadow-sm border border-gray-200 animate-fade-in-up delay-2"
+  >
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+        <.icon name="hero-list-bullet" class="size-4 text-blue-600" />
+        Configurations existantes pour {@org_map[@selected_org] || "l'organisation"}
+      </h2>
+    </div>
+
+    <div :if={@org_event_defs != []} class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+          <tr class="border-b border-gray-200">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Code
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Nom
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Niveau
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Catégorie
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Alerte
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Activé
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr :for={event <- @org_event_defs} class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3 font-mono text-xs font-bold text-blue-600">{event.code}</td>
+            <td class="px-4 py-3 font-medium text-gray-900">{event.resolved_name}</td>
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-700">
+                Niv. {event.resolved_level}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-gray-600">{event.resolved_category || "—"}</td>
+            <td class="px-4 py-3">
+              <span class={[
+                "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold",
+                event.alert_mode == "none" && "bg-gray-100 text-gray-600",
+                event.alert_mode == "alert" && "bg-amber-100 text-amber-700",
+                event.alert_mode == "report" && "bg-blue-100 text-blue-700",
+                event.alert_mode == "both" && "bg-red-100 text-red-700"
+              ]}>
+                {event.alert_mode}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <span class={[
+                "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold",
+                (event.enabled && "bg-green-100 text-green-700") || "bg-red-100 text-red-700"
+              ]}>
+                {if(event.enabled, do: "Oui", else: "Non")}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <button
+                type="button"
+                phx-click="toggle-org-enabled"
+                phx-value-id={event.id}
+                class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded transition-colors"
+                class={
+                  if(event.enabled,
+                    do: "text-amber-600 hover:bg-amber-50",
+                    else: "text-green-600 hover:bg-green-50"
+                  )
+                }
+              >
+                <.icon
+                  name={if(event.enabled, do: "hero-pause", else: "hero-play")}
+                  class="size-3.5"
+                />
+                {if(event.enabled, do: "Désactiver", else: "Activer")}
+              </button>
+              <button
+                type="button"
+                phx-click="delete-org-config"
+                phx-value-id={event.id}
+                class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 rounded transition-colors"
+              >
+                <.icon name="hero-trash" class="size-3.5" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div :if={@standalone_event_defs != []} class="border-t border-gray-100">
+      <div class="px-6 py-3 bg-amber-50/50">
+        <h3 class="text-xs font-semibold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
+          <.icon name="hero-sparkles" class="size-3.5" /> Événements personnalisés
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr class="border-b border-gray-200">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Code
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Nom
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Niveau
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Catégorie
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Activé
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr :for={event <- @standalone_event_defs} class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 font-mono text-xs font-bold text-amber-600">{event.code}</td>
+              <td class="px-4 py-3 font-medium text-gray-900">{event.name}</td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-700">
+                  Niv. {event.level}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-600">{event.category || "—"}</td>
+              <td class="px-4 py-3">
+                <span class={[
+                  "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold",
+                  (event.enabled && "bg-green-100 text-green-700") || "bg-red-100 text-red-700"
+                ]}>
+                  {if(event.enabled, do: "Oui", else: "Non")}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  type="button"
+                  phx-click="toggle-custom-enabled"
+                  phx-value-id={event.id}
+                  class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded transition-colors"
+                  class={
+                    if(event.enabled,
+                      do: "text-amber-600 hover:bg-amber-50",
+                      else: "text-green-600 hover:bg-green-50"
+                    )
+                  }
+                >
+                  <.icon
+                    name={if(event.enabled, do: "hero-pause", else: "hero-play")}
+                    class="size-3.5"
+                  />
+                  {if(event.enabled, do: "Désactiver", else: "Activer")}
+                </button>
+                <button
+                  type="button"
+                  phx-click="delete-custom"
+                  phx-value-id={event.id}
+                  class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 rounded transition-colors"
+                >
+                  <.icon name="hero-trash" class="size-3.5" />
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= if @modal == :org_activate do %>
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <h3 class="text-lg font-bold text-gray-900">
+          Activer un événement pour {@org_map[@selected_org] || "l'organisation sélectionnée"}
+        </h3>
+        <button
+          type="button"
+          phx-click="close-modal"
+          class="size-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+        >
+          <.icon name="hero-x-mark" class="size-5 text-gray-400" />
+        </button>
+      </div>
+
+      <.form for={@activation_form} phx-submit="create_org_event" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Code événement</label>
+          <select
+            name="code"
+            phx-change="on_select_global_event"
+            class="w-full px-3.5 py-2.5 rounded-lg border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+          >
+            <option value="">-- Choisir un événement --</option>
+            <option :for={event <- @available_events} value={event.code}>
+              {event.code} – {event.name}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+            Nom personnalisé (optionnel)
+          </label>
+          <.input
+            field={@activation_form[:custom_name]}
+            type="text"
+            placeholder="Laisser vide pour utiliser le nom par défaut"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Mode d'alerte</label>
+          <.input
+            field={@activation_form[:alert_mode]}
+            type="select"
+            options={[
+              {"Aucun", "none"},
+              {"Alerte", "alert"},
+              {"Rapport", "report"},
+              {"Les deux", "both"}
+            ]}
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+            Règle d'occurrence (JSON)
+          </label>
+          <.input
+            field={@activation_form[:occurrence_rule]}
+            type="textarea"
+            rows="5"
+            class="font-mono text-sm"
+          />
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button
+            type="button"
+            phx-click="close-modal"
+            class="px-4 py-2 text-sm font-bold text-gray-600 bg-white hover:bg-gray-50 rounded-lg border border-gray-300 transition-all"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all"
+          >
+            Activer
+          </button>
+        </div>
+      </.form>
+    </div>
+  </div>
+<% end %>
+
+<%= if @modal == :custom_new do %>
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <h3 class="text-lg font-bold text-gray-900">
+          Nouvel événement personnalisé
+        </h3>
+        <button
+          type="button"
+          phx-click="close-modal"
+          class="size-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+        >
+          <.icon name="hero-x-mark" class="size-5 text-gray-400" />
+        </button>
+      </div>
+
+      <.form
+        for={@form}
+        phx-change="update-custom-form"
+        phx-submit="save-custom-new"
+        class="p-5 space-y-4"
+      >
+        <.input
+          field={@form[:preset_code]}
+          type="select"
+          label="Code prédéfini"
+          prompt="-- Choisir un code --"
+          options={@standalone_code_options}
+        />
+
+        <.input
+          field={@form[:code]}
+          type="text"
+          label="Code"
+          readonly
+          class="bg-gray-50"
+        />
+
+        <.input
+          field={@form[:name]}
+          type="text"
+          label="Nom"
+        />
+
+        <.input
+          field={@form[:category]}
+          type="select"
+          label="Catégorie"
+          options={[
+            {"Alarme", "alarm"},
+            {"Physique", "physical"},
+            {"Dérivé", "derived"},
+            {"Geofence", "geofence"},
+            {"Carburant", "fuel"}
+          ]}
+        />
+
+        <.input
+          field={@form[:level]}
+          type="number"
+          label="Niveau"
+          min="1"
+        />
+
+        <.input
+          field={@form[:occurrence_rule]}
+          type="textarea"
+          label="Règle de déclenchement (JSON)"
+          rows="4"
+          class="font-mono text-sm"
+        />
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button
+            type="button"
+            phx-click="close-modal"
+            class="px-4 py-2 text-sm font-bold text-gray-600 bg-white hover:bg-gray-50 rounded-lg border border-gray-300 transition-all"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all"
+          >
+            Créer
+          </button>
+        </div>
+      </.form>
+    </div>
+  </div>
+<% end %>
