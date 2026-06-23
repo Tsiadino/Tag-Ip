@@ -18,12 +18,13 @@ defmodule EventDefinitionWeb.MonitoringLive do
     alert_logs =
       EventDefinition.Events.AlertLog
       |> Ash.Query.sort(timestamp: :desc)
+      |> Ash.Query.limit(10)
       |> Ash.Query.load([:organization])
       |> Ash.read!()
 
     audit_logs =
       EventDefinition.Events.AuditLog
-      |> Ash.Query.sort(inserted_at: :desc)
+      |> Ash.Query.sort(timestamp: :desc)
       |> Ash.Query.limit(10)
       |> Ash.read!()
 
@@ -49,11 +50,13 @@ defmodule EventDefinitionWeb.MonitoringLive do
   @impl true
   def handle_info({:new_alert, alert}, socket) do
     alert_loaded = Ash.load!(alert, [:organization])
+    # Conserver uniquement les 10 dernières alertes à l'écran pour la performance
+    updated_alerts = [alert_loaded | socket.assigns.alert_logs] |> Enum.take(10)
 
     {:noreply,
      socket
-     |> assign(alert_logs: [alert_loaded | socket.assigns.alert_logs])
-     |> put_flash(:info, "Nouvelle alerte reçue : #{alert_loaded.event_code}")}
+     |> assign(alert_logs: updated_alerts)
+     |> put_flash(:info, "🔔 Nouvelle alerte reçue : #{alert_loaded.event_code}")}
   end
 
   @impl true
@@ -74,12 +77,30 @@ defmodule EventDefinitionWeb.MonitoringLive do
       logs_enabled: params["logs_enabled"] == "true"
     }
 
+    org_id = params["organization_id"]
+    event_name = params["event_name"]
+
+    if org_id do
+      org =
+        EventDefinition.Accounts.Organization
+        |> Ash.get!(org_id)
+
+      merged_config = Map.merge(org.config || %{}, new_config)
+
+      org
+      |> Ash.Changeset.for_update(:update, %{config: merged_config})
+      |> Ash.update!()
+    end
+
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
     audit_params = %{
-      organization_id: params["organization_id"],
+      organization_id: org_id,
+      event_id: "config_update",
       action: "Modification Config",
       details: %{polling_interval: params["polling_interval"], webhook_url: params["webhook_url"]},
       user: "Fannie",
-      timestamp: DateTime.utc_now() |> DateTime.truncate(:second)
+      timestamp: now
     }
 
     EventDefinition.Events.AuditLog
@@ -88,20 +109,20 @@ defmodule EventDefinitionWeb.MonitoringLive do
 
     updated_audit_logs =
       EventDefinition.Events.AuditLog
-      |> Ash.Query.sort(inserted_at: :desc)
+      |> Ash.Query.sort(timestamp: :desc)
       |> Ash.Query.limit(10)
       |> Ash.read!()
 
     {:noreply,
      socket
      |> assign(monitoring_config: new_config, audit_logs: updated_audit_logs)
-     |> assign(selected_org_id: params["organization_id"])
-     |> assign(selected_event: params["event_name"])
+     |> assign(selected_org_id: org_id)
+     |> assign(selected_event: event_name)
      |> push_event("show_toast", %{
        type: "success",
-       message: "✓ Configuration sauvegardée avec succès"
+       message: "Configuration sauvegardée avec succès"
      })
-     |> put_flash(:info, "Configuration mise à jour et auditée avec succès")}
+     |> put_flash(:info, "Configuration mise à jour et audité avec succès")}
   end
 
   @impl true
@@ -121,20 +142,44 @@ defmodule EventDefinitionWeb.MonitoringLive do
          |> Ash.Changeset.for_create(:create, alert_params)
          |> Ash.create() do
       {:ok, new_alert} ->
-        spawn(fn -> Req.post(webhook_url, json: alert_params) end)
-
         Phoenix.PubSub.broadcast(
           EventDefinition.PubSub,
           "monitoring_alerts",
           {:new_alert, new_alert}
         )
 
+        webhook_result =
+          case Req.post(webhook_url, json: alert_params, receive_timeout: 5000) do
+            {:ok, %{status: status}} when status in 200..299 ->
+              {:ok, status}
+
+            {:ok, %{status: status}} ->
+              {:error, "HTTP #{status}"}
+
+            {:error, reason} ->
+              {:error, inspect(reason)}
+          end
+
+        now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+        {webhook_status, webhook_response} =
+          case webhook_result do
+            {:ok, status} -> {"success", "HTTP #{status}"}
+            {:error, reason} -> {"error", reason}
+          end
+
         audit_params = %{
           organization_id: socket.assigns.selected_org_id,
+          event_id: "webhook_test",
           action: "Test Webhook",
-          details: %{event_code: alert_params.event_code, message: alert_params.message},
+          details: %{
+            event_code: alert_params.event_code,
+            message: alert_params.message,
+            webhook_status: webhook_status,
+            webhook_response: webhook_response
+          },
           user: "Fannie",
-          timestamp: DateTime.utc_now() |> DateTime.truncate(:second)
+          timestamp: now
         }
 
         EventDefinition.Events.AuditLog
@@ -142,16 +187,28 @@ defmodule EventDefinitionWeb.MonitoringLive do
         |> Ash.create()
 
         updated_audit_logs =
-          EventDefinition.Events.AuditLog |> Ash.Query.sort(inserted_at: :desc) |> Ash.read!()
+          EventDefinition.Events.AuditLog
+          |> Ash.Query.sort(timestamp: :desc)
+          |> Ash.Query.limit(10)
+          |> Ash.read!()
+
+        {toast_type, toast_msg} =
+          case webhook_result do
+            {:ok, _} ->
+              {"success", "Webhook vérifié avec succès pour #{alert_params.event_code}"}
+
+            {:error, reason} ->
+              {"warning", "Webhook : #{reason} pour #{alert_params.event_code}"}
+          end
 
         {:noreply,
          socket
          |> assign(audit_logs: updated_audit_logs)
          |> push_event("show_toast", %{
-           type: "info",
-           message: "🚀 Alerte test envoyée pour #{alert_params.event_code} !"
+           type: toast_type,
+           message: toast_msg
          })
-         |> put_flash(:info, "Signal envoyé et audité pour #{alert_params.event_code} !")}
+         |> put_flash(:info, toast_msg)}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Erreur d'enregistrement PostgreSQL")}
