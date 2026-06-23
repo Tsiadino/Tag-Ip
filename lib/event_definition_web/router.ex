@@ -52,12 +52,13 @@ defmodule EventDefinitionWeb.Router do
   scope "/", EventDefinitionWeb do
     pipe_through [:browser]
 
+    get "/download/:file", DownloadController, :csv
+
     live_session :authenticated, on_mount: [{EventDefinitionWeb.Auth, :ensure_authenticated}] do
       live "/", HomeLive, :index
       live "/dashboard", DashboardLive, :index
       live "/init", InitLive, :index
       live "/global-events", GlobalEventsLive, :index
-      live "/global-events/new", EventNewLive, :new
       live "/global-events/:id/edit", EventEditLive, :edit
       live "/org-events", OrgEventsLive, :index
       live "/org-events/:org_id/new-standalone", OrgEventStandaloneNewLive, :new
