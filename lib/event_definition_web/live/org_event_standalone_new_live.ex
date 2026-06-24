@@ -112,7 +112,7 @@ defmodule EventDefinitionWeb.OrgEventStandaloneNewLive do
           code: params["code"],
           name: params["name"],
           definition: empty_to_nil(params["definition"]),
-          category: params["category"],
+          category: empty_to_nil(params["category"]),
           class: params["class"],
           level: String.to_integer(params["level"] || "2"),
           level_group: empty_to_nil(params["level_group"]),
