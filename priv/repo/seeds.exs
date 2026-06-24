@@ -65,6 +65,8 @@ csv_path
   level = Enum.at(row, 11)
   monitor_type = row |> Enum.filter(&(&1 != "")) |> List.last() || "track.events"
 
+  category = if category in ["", nil], do: "physical", else: category
+
   id_string = UUID.generate()
 
   %{
