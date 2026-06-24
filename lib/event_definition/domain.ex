@@ -13,5 +13,6 @@ defmodule EventDefinition.Domain do
     resource(EventDefinition.Events.OrganizationEventDefinition)
     resource(EventDefinition.Events.AlertLog)
     resource(EventDefinition.Events.AuditLog)
+    resource(EventDefinition.Events.FeatureCollection)
   end
 end

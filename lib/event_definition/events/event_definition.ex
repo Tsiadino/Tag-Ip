@@ -15,17 +15,13 @@ defmodule EventDefinition.Events.EventDefinition do
     attribute(:name, :string, allow_nil?: false)
     attribute(:definition, :string)
 
-    # On définit l'attribut une seule fois avec toutes ses contraintes
-    attribute :category, :atom do
+    attribute :category, EventDefinition.Events.Category do
       allow_nil?(false)
-      constraints(unsafe_to_atom?: true)
     end
 
-    # Il est prudent de faire pareil pour :class si tes données CSV sont variées
-    attribute :class, :atom do
+    attribute :class, EventDefinition.Events.Class do
       allow_nil?(false)
       default(:unknown)
-      constraints(unsafe_to_atom?: true)
     end
 
     attribute(:level, :integer, allow_nil?: false, constraints: [min: 1])
