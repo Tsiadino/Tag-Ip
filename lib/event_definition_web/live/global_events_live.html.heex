@@ -12,7 +12,8 @@
             Catalogue Global des Événements
           </h1>
           <p class="text-sm text-slate-500 mt-0.5">
-            Définitions système — <strong class="text-slate-800">{@total_events_count}</strong> événements
+            Définitions système — <strong class="text-slate-800">{@total_events_count}</strong>
+            événements
           </p>
         </div>
       </div>
@@ -25,12 +26,11 @@
     </div>
   </div>
 
-  <form 
-    phx-change="form-changed" 
+  <form
+    phx-change="form-changed"
     class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 animate-fade-in-up delay-1"
   >
     <div class="flex flex-wrap items-center gap-4">
-      
       <div class="relative flex-1 min-w-[280px]">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <.icon name="hero-magnifying-glass" class="size-5 text-slate-400" />
@@ -54,7 +54,9 @@
         >
           <option value="">Toutes les catégories</option>
           <%= for cat <- @categories do %>
-            <option value={cat} selected={to_string(@selected_category) == to_string(cat)}>{cat}</option>
+            <option value={cat} selected={to_string(@selected_category) == to_string(cat)}>
+              {cat}
+            </option>
           <% end %>
         </select>
       </div>
@@ -67,11 +69,12 @@
         >
           <option value="">Toutes les classes</option>
           <%= for cls <- @classes do %>
-            <option value={cls} selected={to_string(@selected_class) == to_string(cls)}>{cls}</option>
+            <option value={cls} selected={to_string(@selected_class) == to_string(cls)}>
+              {cls}
+            </option>
           <% end %>
         </select>
       </div>
-
     </div>
   </form>
 
@@ -110,7 +113,10 @@
           <%= for event <- @events do %>
             <tr class={[
               "transition-all duration-150",
-              if(event.active, do: "hover:bg-blue-50/50", else: "opacity-60 hover:opacity-80 hover:bg-slate-50")
+              if(event.active,
+                do: "hover:bg-blue-50/50",
+                else: "opacity-60 hover:opacity-80 hover:bg-slate-50"
+              )
             ]}>
               <td class="px-4 py-3.5 w-[1%] whitespace-nowrap">
                 <span class="font-mono text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
@@ -126,11 +132,16 @@
               <td class="px-4 py-3.5">
                 <span class={[
                   "inline-flex px-2 py-0.5 text-xs font-semibold rounded",
-                  to_string(event.category) == "physical" && "bg-blue-50 text-blue-700 border border-blue-200",
-                  to_string(event.category) == "system" && "bg-violet-50 text-violet-700 border border-violet-200",
-                  to_string(event.category) == "derived" && "bg-amber-50 text-amber-700 border border-amber-200",
-                  to_string(event.category) == "alarm" && "bg-red-50 text-red-700 border border-red-200",
-                  to_string(event.category) == "fuel" && "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  to_string(event.category) == "physical" &&
+                    "bg-blue-50 text-blue-700 border border-blue-200",
+                  to_string(event.category) == "system" &&
+                    "bg-violet-50 text-violet-700 border border-violet-200",
+                  to_string(event.category) == "derived" &&
+                    "bg-amber-50 text-amber-700 border border-amber-200",
+                  to_string(event.category) == "alarm" &&
+                    "bg-red-50 text-red-700 border border-red-200",
+                  to_string(event.category) == "fuel" &&
+                    "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 ]}>
                   {event.category}
                 </span>
@@ -175,11 +186,16 @@
                     title={if(event.active, do: "Désactiver", else: "Activer")}
                     class={[
                       "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-lg border transition-all",
-                      event.active && "text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100",
-                      !event.active && "text-emerald-600 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                      event.active &&
+                        "text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100",
+                      !event.active &&
+                        "text-emerald-600 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
                     ]}
                   >
-                    <.icon name={if(event.active, do: "hero-pause", else: "hero-play")} class="size-3" />
+                    <.icon
+                      name={if(event.active, do: "hero-pause", else: "hero-play")}
+                      class="size-3"
+                    />
                   </button>
 
                   <button
@@ -211,20 +227,20 @@
         </tbody>
       </table>
     </div>
-
-    <!-- BARRE DE PAGINATION ADAPTATIVE INTEGRÉE -->
+    
+<!-- BARRE DE PAGINATION ADAPTATIVE INTEGRÉE -->
     <div class="flex items-center justify-between bg-white px-4 py-3 border-t border-slate-200 sm:px-6 rounded-b-xl -mt-1 shadow-sm">
       <div class="flex flex-1 justify-between sm:hidden">
-        <button 
-          phx-click="go-to-page" 
+        <button
+          phx-click="go-to-page"
           phx-value-page={max(1, @page - 1)}
           disabled={@page == 1}
           class="relative inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
         >
           Précédent
         </button>
-        <button 
-          phx-click="go-to-page" 
+        <button
+          phx-click="go-to-page"
           phx-value-page={min(@total_pages, @page + 1)}
           disabled={@page == @total_pages}
           class="relative ml-3 inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
@@ -232,19 +248,22 @@
           Suivant
         </button>
       </div>
-      
+
       <div class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
         <div class="text-sm text-slate-700">
-          Affichage de <span class="font-medium"><%= max(1, (@page - 1) * 10 + 1) %></span> 
-          à <span class="font-medium"><%= min(@page * 10, @total_events_count) %></span> 
-          sur <span class="font-medium"><%= @total_events_count %></span> résultats
+          Affichage de <span class="font-medium">{max(1, (@page - 1) * 10 + 1)}</span>
+          à <span class="font-medium">{min(@page * 10, @total_events_count)}</span>
+          sur <span class="font-medium">{@total_events_count}</span>
+          résultats
         </div>
 
         <div class="flex items-center gap-3">
-          <div class="isolate inline-flex -space-x-px rounded-md shadow-xs gap-1" aria-label="Pagination">
-            
-            <button 
-              phx-click="go-to-page" 
+          <div
+            class="isolate inline-flex -space-x-px rounded-md shadow-xs gap-1"
+            aria-label="Pagination"
+          >
+            <button
+              phx-click="go-to-page"
               phx-value-page={@page - 1}
               disabled={@page == 1}
               class="relative inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border bg-white text-slate-600 border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all"
@@ -253,22 +272,20 @@
             </button>
 
             <span class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg select-none">
-              <%= @page %> / <%= @total_pages %>
+              {@page} / {@total_pages}
             </span>
 
-            <button 
-              phx-click="go-to-page" 
+            <button
+              phx-click="go-to-page"
               phx-value-page={@page + 1}
               disabled={@page == @total_pages}
               class="relative inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border bg-white text-slate-600 border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all"
             >
               &gt;
             </button>
-
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -305,7 +322,9 @@
         <div class="p-5 space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
-              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Code Événement</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Code Événement
+              </label>
               <input
                 type="text"
                 name="code"
@@ -316,7 +335,9 @@
             </div>
 
             <div class="form-group">
-              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nom (ou Preset)</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Nom (ou Preset)
+              </label>
               <input
                 type="text"
                 name="name"
@@ -335,7 +356,9 @@
 
           <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
-              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Monitor Type</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Monitor Type
+              </label>
               <input
                 type="text"
                 name="monitor_type"
@@ -355,7 +378,9 @@
           </div>
 
           <div class="form-group">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Description / Trigger</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+              Description / Trigger
+            </label>
             <textarea
               name="description"
               rows="2"
@@ -443,7 +468,9 @@
         <div class="p-5 space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
-              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Code Événement</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Code Événement
+              </label>
               <input
                 type="text"
                 name="code"
@@ -454,7 +481,9 @@
             </div>
 
             <div class="form-group">
-              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nom de l'événement</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Nom de l'événement
+              </label>
               <input
                 type="text"
                 name="name"
@@ -473,7 +502,9 @@
 
           <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
-              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Monitor Type</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Monitor Type
+              </label>
               <input
                 type="text"
                 name="monitor_type"
@@ -493,7 +524,9 @@
           </div>
 
           <div class="form-group">
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Description / Trigger</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+              Description / Trigger
+            </label>
             <textarea
               name="description"
               rows="2"
